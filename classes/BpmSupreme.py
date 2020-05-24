@@ -87,26 +87,25 @@ class BpmSupreme:
     Args:
       - none
     """
-    download_button_set = set()
     already_downloaded = set()
+    rows_on_page = set()
+    songs_to_download = set()
     while True:
-      download_button_set.update(self.driver.find_elements_by_class_name("hide-mobile"))
-      queue = (len(download_button_set) - len(already_downloaded))
-      print("Current queue size is: " + str(queue))
+      # Add all current songs to a set
+      rows_on_page = self.driver.find_elements_by_class_name("row-item")
+      for row in rows_on_page:
+        songs_to_download.add(Song(self.driver, row))
       
-      # Click every link in the download_button_set
-      for button in download_button_set:
-        if button in already_downloaded:
+      for song in songs_to_download:
+        if song in already_downloaded:
           continue
-        
-        
+        song.download_song()
+        already_downloaded.add(song)
+        print("Downloaded " + song.name + " by " + song.artist)
 
       # Scroll down to the bottom of the page
       print("Scrolling to bottom of page")
       self.scroll_page()
-      
-      # Add current button list to already_downloaded set
-      already_downloaded.update(download_button_set)
   
   def scroll_page(self):
     """
