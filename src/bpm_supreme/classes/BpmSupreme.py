@@ -26,10 +26,13 @@ class BpmSupreme:
     Constructor for BpmSupreme object
 
     Args:
-      - driver: WebDriver object
+      - driver: Firefox WebDriver object
       - username: Username string
       - password: Password string
     """
+    if not isinstance(driver, Firefox):
+      raise expected_conditions.WebDriverException
+    
     self.driver = driver
     self._username = username
     self._password = password
