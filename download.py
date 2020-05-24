@@ -10,7 +10,8 @@ from selenium.common.exceptions import NoSuchElementException
 
 import time
 import getpass
-import os
+from os import path
+from os import listdir
 
 from classes import BpmSupreme
 
@@ -19,7 +20,7 @@ USERNAME = input("Username:")
 PASSWORD = getpass.getpass()
 DOWNLOAD_PATH = str()
 
-while not os.path.isdir(DOWNLOAD_PATH):
+while not path.isdir(DOWNLOAD_PATH):
   DOWNLOAD_PATH = input("Download file path: ")
 
 # Set Firefox profile 
