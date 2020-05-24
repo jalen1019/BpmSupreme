@@ -114,20 +114,21 @@ class BpmSupreme:
     Args:
       - none
     """
-    # Get scroll height.
-    last_height = self.driver.execute_script("return document.body.scrollHeight")
+    last_height = 1
+    new_height = 0
+    
+    while new_height <= last_height:
+      # Get scroll height.
+      last_height = self.driver.execute_script("return document.body.scrollHeight")
 
-    # Scroll down
-    self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    # Wait to load the page.
-    time.sleep(BpmSupreme.SLEEP_INTERVAL * 10)
+      # Scroll down
+      self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+      # Wait to load the page.
+      time.sleep(BpmSupreme.SLEEP_INTERVAL * 10)
 
-    # Calculate new scroll height and compare with last scroll height.
-    new_height = self.driver.execute_script("return document.body.scrollHeight")
+      # Calculate new scroll height and compare with last scroll height.
+      new_height = self.driver.execute_script("return document.body.scrollHeight")
 
-    # If the page has loaded, new_height should be bigger
-    if new_height <= last_height:
-      input("Could not load new song rows! Load new height before pressing ENTER...")
 
 class Song():
   """
