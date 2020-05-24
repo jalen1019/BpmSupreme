@@ -16,6 +16,7 @@ class BpmSupreme:
   Methods:
     - site_login()
     - download_library()
+    - scroll_page()
   """
 
   SLEEP_INTERVAL = int()
@@ -28,6 +29,7 @@ class BpmSupreme:
   def _load_page(self):
     """
     Utility function to wait for webpages to load
+
     Args:
       - none
     """
@@ -40,7 +42,8 @@ class BpmSupreme:
 
   def site_login(self):
     """
-    Logs into the site using the defined user credentials
+    Logs into https://www.bpmsupreme.com using the defined user credentials
+    
     Args:
       - none
     """
@@ -71,7 +74,8 @@ class BpmSupreme:
           
   def download_library(self):
     """
-    Downloads library account
+    Downloads account-history library
+    
     Args:
       - none
     """
@@ -98,7 +102,7 @@ class BpmSupreme:
         if len(popup) != 0:
           print("Detected max download popup! Attempting to resolve...")
           time.sleep(BpmSupreme.SLEEP_INTERVAL)
-          
+
           # Click close button on popup
           for attempt in range(0,3):
             # If there is no popup present on the page, exit the loop
@@ -115,21 +119,29 @@ class BpmSupreme:
 
       # Scroll down to the bottom of the page
       print("Scrolling to bottom of page")
+      self.scroll_page()
       
-      # Get scroll height.
-      last_height = self.driver.execute_script("return document.body.scrollHeight")
-
-      # Scroll down
-      self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-      # Wait to load the page.
-      time.sleep(BpmSupreme.SLEEP_INTERVAL * 10)
-
-      # Calculate new scroll height and compare with last scroll height.
-      new_height = self.driver.execute_script("return document.body.scrollHeight")
-
-      # If the page has loaded, new_height should be bigger
-      if new_height <= last_height:
-        input("Could not load new song rows! Load new height before pressing ENTER...")
-
       # Add current button list to already_downloaded set
       already_downloaded.update(download_button_set)
+  
+  def scroll_page(self):
+    """
+    Scrolls the page down.
+
+    Args:
+      - none
+    """
+    # Get scroll height.
+    last_height = self.driver.execute_script("return document.body.scrollHeight")
+
+    # Scroll down
+    self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+    # Wait to load the page.
+    time.sleep(BpmSupreme.SLEEP_INTERVAL * 10)
+
+    # Calculate new scroll height and compare with last scroll height.
+    new_height = self.driver.execute_script("return document.body.scrollHeight")
+
+    # If the page has loaded, new_height should be bigger
+    if new_height <= last_height:
+      input("Could not load new song rows! Load new height before pressing ENTER...")
