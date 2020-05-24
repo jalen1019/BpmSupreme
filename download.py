@@ -8,6 +8,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 from selenium.common.exceptions import NoSuchElementException
 import time
+import getpass
+
+# Prompt for user credentials 
+USERNAME = input("Username:")
+PASSWORD = getpass.getpass()
+SLEEP_INTERVAL = 1.5
 
 # Set Firefox profile 
 options = Options()
@@ -21,8 +27,6 @@ firefox_profile.set_preference("browser.download.manager.showWhenStarting", "fal
 firefox_profile.set_preference("browser.download.panel.shown", "false")
 firefox_profile.set_preference("browser.safebrowsing.downloads.enabled", "false")
 
-SLEEP_INTERVAL = 1.5
-
 with Firefox(firefox_profile) as driver:
   def load_page():
     try:
@@ -32,7 +36,7 @@ with Firefox(firefox_profile) as driver:
       print("Exception Occurred! Waiting " + str(SLEEP_INTERVAL) + " seconds before resuming...")
       time.sleep(SLEEP_INTERVAL)
 
-  def site_login():
+  def site_login(USERNAME, PASSWORD):
     # Get the initial site page
     driver.get("https://www.bpmsupreme.com/")
 
@@ -47,8 +51,8 @@ with Firefox(firefox_profile) as driver:
     pass_box = driver.find_element_by_id("login-form-password")
 
     # Input user credentials
-    user_name_box.send_keys("USEREMAIL" + Keys.TAB)
-    pass_box.send_keys("PASSWORD" + Keys.ENTER)
+    user_name_box.send_keys(USERNAME + Keys.TAB)
+    pass_box.send_keys(PASSWORD + Keys.ENTER)
     time.sleep(SLEEP_INTERVAL)
 
     # Let the dashboard load, then navigate to download-history
@@ -120,7 +124,7 @@ with Firefox(firefox_profile) as driver:
         
   # MAIN FUNCTION HERE
   # Log into account
-  site_login()
+  site_login(USERNAME, PASSWORD)
   
   input("Press ENTER to begin downloading files...")
   download_library()
