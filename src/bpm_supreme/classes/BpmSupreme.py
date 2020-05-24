@@ -30,8 +30,10 @@ class BpmSupreme:
       - username: Username string
       - password: Password string
     """
-    if not isinstance(driver, Firefox):
-      raise expected_conditions.WebDriverException
+    # Check argument types
+    if driver is not Firefox: raise expected_conditions.WebDriverException
+    if username is not str: raise TypeError
+    if password is not str: raise TypeError
     
     self.driver = driver
     self._username = username
@@ -151,6 +153,11 @@ class Song():
       - driver: Selenium WebDriver object
       - container: row-item WebElement
     """
+    
+    # Check argument types
+    if driver is not Firefox: raise expected_conditions.WebDriverException
+    if container is not expected_conditions.WebElement: raise TypeError
+
     self.driver = driver
     self._container = container
 
