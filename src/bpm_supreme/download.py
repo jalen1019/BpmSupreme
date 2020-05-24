@@ -13,7 +13,7 @@ import getpass
 from os import path
 from os import listdir
 
-from classes import BpmSupreme
+from .classes import BpmSupreme
 
 # Prompt for user credentials 
 USERNAME = input("Username:")
@@ -35,6 +35,7 @@ firefox_profile.set_preference("browser.download.manager.showWhenStarting", "fal
 firefox_profile.set_preference("browser.download.panel.shown", "false")
 firefox_profile.set_preference("browser.safebrowsing.downloads.enabled", "false")
 
+# Begin main functionality
 with Firefox(firefox_profile) as driver:        
   # MAIN FUNCTION HERE
   # Log into account
