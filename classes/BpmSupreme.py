@@ -99,31 +99,7 @@ class BpmSupreme:
         if button in already_downloaded:
           continue
         
-        try:
-          button.click()
-          popup = self.driver.find_elements_by_class_name("popup")
-
-        except:
-          print("Could not click button!")
-
-        # If a popup has appeared, resolve the popup
-        if len(popup) != 0:
-          print("Detected max download popup! Attempting to resolve...")
-          time.sleep(BpmSupreme.SLEEP_INTERVAL)
-
-          # Click close button on popup
-          for attempt in range(0,3):
-            # If there is no popup present on the page, exit the loop
-            if self.driver.find_elements_by_class_name("popup") == 0:
-              print("Popup no longer detected on page. Popup resolved...")
-              break
-
-            try:
-              self.driver.find_element_by_class_name("close").click()
-              break
-              
-            except:
-              print("Could not resolve! (Attempt: " + str(attempt + 1) + " of 3")
+        
 
       # Scroll down to the bottom of the page
       print("Scrolling to bottom of page")
@@ -158,6 +134,9 @@ class Song():
   """
   Object representing a BPMSupreme song
 
+  Methods:
+    - download_song()
+
   Properties:
     - name: Song name
     - artist: Song artist
@@ -178,6 +157,49 @@ class Song():
 
     # Find download button of row-item
     self.download_button = self._container.find_element_by_class_name("hide-mobile")
+
+  def __hash__(self):
+    return hash((self._container))
+
+  def __eq__(self, other):
+    if not isinstance(other, type(self)): return NotImplemented
+    return self._container == other._container
+
+  def download_song(self):
+    """
+    Clicks the download_song button
+
+    Args:
+      - none
+    """
+    try:
+      self.download_button.click()
+      # Find any class associated with a popup
+      popup = self.driver.find_elements_by_class_name("popup")
+
+    except:
+      print("Could not click download button!")
+
+    # If a popup has appeared, resolve the popup
+    if len(popup) != 0:
+      print("Detected max download popup! Attempting to resolve...")
+      time.sleep(BpmSupreme.SLEEP_INTERVAL)
+
+      # Click close button on popup
+      for attempt in range(0,3):
+        # If there is no popup present on the page, exit the loop
+        if self.driver.find_elements_by_class_name("popup") == 0:
+          print("Popup no longer detected on page. Popup resolved...")
+          break
+
+        try:
+          # Try to click the close button
+          self.driver.find_element_by_class_name("close").click()
+          break
+        
+        # Loop back around if unable to resolve on current attempt
+        except:
+          print("Could not resolve! (Attempt: " + str(attempt + 1) + " of 3")
 
   @property
   def name(self):
