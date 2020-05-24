@@ -6,9 +6,12 @@ import pytest
 from src.bpm_supreme.classes.BpmSupreme import BpmSupreme
 from src.bpm_supreme.classes.BpmSupreme import Song
 from selenium.webdriver import Firefox
+from selenium.webdriver.support import expected_conditions
 
-class test_bpm_supreme:
-  def test___init__(self):
-    driver = "test"
-    with pytest.raises(TypeError) as exception_info:
-      obj = BpmSupreme(driver, "Username", "Password")
+# Test driver type
+def test___init__():
+  driver = "Failure"
+  with pytest.raises(expected_conditions.WebDriverException):
+    obj = BpmSupreme(driver, "Username", "Password")
+
+#
