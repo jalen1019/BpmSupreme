@@ -77,7 +77,6 @@ class BpmSupreme:
     """
     download_button_set = set()
     already_downloaded = set()
-    download_count = 0
     while True:
       download_button_set.update(self.driver.find_elements_by_class_name("hide-mobile"))
       queue = (len(download_button_set) - len(already_downloaded))
@@ -91,26 +90,28 @@ class BpmSupreme:
         try:
           button.click()
           popup = self.driver.find_elements_by_class_name("popup")
-          download_count += 1
 
         except:
           print("Could not click button!")
-          if download_count != 0:
-            download_count -= 1
 
         # If a popup has appeared, resolve the popup
         if len(popup) != 0:
-          download_count -= 1
           print("Detected max download popup! Attempting to resolve...")
           time.sleep(BpmSupreme.SLEEP_INTERVAL)
+          
           # Click close button on popup
           for attempt in range(0,3):
+            # If there is no popup present on the page, exit the loop
+            if self.driver.find_elements_by_class_name("popup") == 0:
+              print("Popup no longer detected on page. Popup resolved...")
+              break
+
             try:
               self.driver.find_element_by_class_name("close").click()
               break
               
             except:
-              print("Could not resolve! (Attempt: " + str(attempt + 1) + " of 3)")
+              print("Could not resolve! (Attempt: " + str(attempt + 1) + " of 3")
 
       # Scroll down to the bottom of the page
       print("Scrolling to bottom of page")
@@ -131,5 +132,4 @@ class BpmSupreme:
         input("Could not load new song rows! Load new height before pressing ENTER...")
 
       # Add current button list to already_downloaded set
-      print("Downloads completed: " + str(download_count))
       already_downloaded.update(download_button_set)
