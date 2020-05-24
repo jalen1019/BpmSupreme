@@ -22,6 +22,14 @@ class BpmSupreme:
   SLEEP_INTERVAL = int()
   
   def __init__(self, driver, username, password):
+    """
+    Constructor for BpmSupreme object
+
+    Args:
+      - driver: WebDriver object
+      - username: Username string
+      - password: Password string
+    """
     self.driver = driver
     self._username = username
     self._password = password
@@ -145,3 +153,43 @@ class BpmSupreme:
     # If the page has loaded, new_height should be bigger
     if new_height <= last_height:
       input("Could not load new song rows! Load new height before pressing ENTER...")
+
+class Song():
+  """
+  Object representing a BPMSupreme song
+
+  Properties:
+    - name: Song name
+    - artist: Song artist
+  """
+  def __init__(self, driver, container):
+    """
+    Song constructor
+    Args:
+      - driver: Selenium WebDriver object
+      - container: row-item WebElement
+    """
+    self.driver = driver
+    self._container = container
+
+    # Find child elements of row-item container matching song details
+    self.name = self._container.find_element_by_class_name("row-track-name").find_element_by_name("span").text
+    self.artist = self._container.find_element_by_class_name("row-artist").find_element_by_class_name("link").text
+
+    # Find download button of row-item
+    self.download_button = self._container.find_element_by_class_name("hide-mobile")
+
+  @property
+  def name(self):
+    """The name of the song"""
+    return self.name
+  
+  @property
+  def artist(self):
+    """The artist of the song"""
+    return self.artist
+
+  @property
+  def download_button(self):
+    """WebElement of download button of song"""
+    return self.download_button
