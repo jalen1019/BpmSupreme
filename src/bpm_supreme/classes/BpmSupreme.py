@@ -11,7 +11,7 @@ import getpass
 
 class BpmSupreme:  
   """
-  Class representing a BPMSupreme
+  Class representing a BPMSupreme account
   
   Methods:
     - site_login()
@@ -19,21 +19,21 @@ class BpmSupreme:
     - scroll_page()
   """
 
-  SLEEP_INTERVAL = int()
+  SLEEP_INTERVAL = 1.25
   
   def __init__(self, driver, username, password):
     """
     Constructor for BpmSupreme object
 
     Args:
-      - driver: Firefox WebDriver object
+      - driver: WebDriver object
       - username: Username string
       - password: Password string
     """
     # Check argument types
-    if driver is not Firefox: raise expected_conditions.WebDriverException
-    if username is not str: raise TypeError
-    if password is not str: raise TypeError
+    if isinstance(driver, Firefox) != True: raise expected_conditions.WebDriverException
+    if isinstance(username, str) != True: raise TypeError("Bad username arg type")
+    if isinstance(password, str) != True: raise TypeError("Bad password arg type")
     
     self.driver = driver
     self._username = username

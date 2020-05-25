@@ -1,17 +1,26 @@
 """
-This test file determines if duplicate file detection is working as intended
+This test file determines if BpmSupreme class methods are working correctly
 """
 
 import pytest
-from src.bpm_supreme.classes.BpmSupreme import BpmSupreme
-from src.bpm_supreme.classes.BpmSupreme import Song
+from selenium.common import exceptions as selenium_exceptions
 from selenium.webdriver import Firefox
-from selenium.webdriver.support import expected_conditions
 
-# Test driver type
-def test___init__():
-  driver = "Failure"
-  with pytest.raises(expected_conditions.WebDriverException):
-    obj = BpmSupreme(driver, "Username", "Password")
+from src.bpm_supreme.classes.BpmSupreme import BpmSupreme
 
-#
+# Check BpmSupreme constructor argument validation
+def test_constructor():
+  with Firefox() as driver:
+    # Bad webdriver
+    with pytest.raises(selenium_exceptions.WebDriverException):
+      BpmSupreme("Driver", "Username", "Password")
+
+    # Bad username
+    with pytest.raises(TypeError):
+      BpmSupreme(driver, driver, "password")
+      driver.close()
+
+    # Bad password
+    with pytest.raises(TypeError):
+      BpmSupreme(driver, "username", driver)
+      driver.close()
