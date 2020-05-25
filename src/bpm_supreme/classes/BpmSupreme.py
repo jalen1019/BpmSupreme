@@ -39,19 +39,26 @@ class BpmSupreme:
     self._username = username
     self._password = password
   
-  def _load_page(self):
+  def _load_page(self, sleep_time=SLEEP_INTERVAL):
     """
     Utility function to wait for webpages to load
 
     Args:
-      - none
+      - sleep_time - Wait time if unable to detect loader class
     """
-    try:
-      WebDriverWait(self.driver, 10).until(expected_conditions.invisibility_of_element_located(self.driver.find_element_by_xpath("//div[@class='loader']")))
+    # Spinning circle element
+    loader = self.driver.find_elements_by_xpath("//div[@class='loader']")
+    
+    # If detect loading element, wait until invisible
+    if len(loader) >= 1:
+      print("Loading " + self.driver.current_url)
+      for element in loader:
+        WebDriverWait(self.driver, sleep_time).until(expected_conditions.invisibility_of_element(element))
+      time.sleep(sleep_time)
+      return True
 
-    except NoSuchElementException:
-      print("Exception Occurred! Waiting " + str(BpmSupreme.SLEEP_INTERVAL) + " seconds before resuming...")
-      time.sleep(BpmSupreme.SLEEP_INTERVAL)
+    time.sleep(sleep_time)
+    return False
 
   def site_login(self):
     """
@@ -59,31 +66,33 @@ class BpmSupreme:
     
     Args:
       - none
+    
+    Returns:
+      - True if successful login
+      - False if failed login
     """
-    # Get the initial site page
-    self.driver.get("https://www.bpmsupreme.com/")
-
-    # Click on login box at top of page
+    # Get the login page and let the page load for five seconds
+    self.driver.get("https://www.bpmsupreme.com/login")
     self._load_page()
-    login_box = self.driver.find_element_by_class_name("user-login-logout")
-    login_box.click()
 
     # Initialize username and password field variables
-    self._load_page()
     user_name_box = self.driver.find_element_by_id("login-form-email")
     pass_box = self.driver.find_element_by_id("login-form-password")
 
     # Input user credentials
+    user_name_box.click()
     user_name_box.send_keys(self._username + Keys.TAB)
     pass_box.send_keys(self._password + Keys.ENTER)
-    time.sleep(BpmSupreme.SLEEP_INTERVAL)
-
-    # Let the dashboard load, then navigate to download-history
     self._load_page()
-    self.driver.get("https://app.bpmsupreme.com/account/download-history")
 
-    # Let the page load before exiting function
+    # Check if site log in was successful
+    if self.driver.current_url == "https://www.bpmsupreme.com/login":
+      # Site login failed
+      return False
+    
+    # Let login page load before exiting
     self._load_page()
+    return True
           
   def download_library(self):
     """
@@ -92,6 +101,13 @@ class BpmSupreme:
     Args:
       - none
     """
+
+    # Navigate to download-history
+    self.driver.get("https://app.bpmsupreme.com/account/download-history")
+
+    # Let the page load before exiting function
+    self._load_page()
+    
     already_downloaded = set()
     rows_on_page = set()
     songs_to_download = set()

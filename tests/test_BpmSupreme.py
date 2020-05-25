@@ -8,6 +8,14 @@ from selenium.webdriver import Firefox
 
 from src.bpm_supreme.classes.BpmSupreme import BpmSupreme
 
+@pytest.fixture
+def account(username, password):
+  driver = Firefox()
+  account = BpmSupreme(driver, username, password)
+  yield account
+  print("Tearing down Selenium Firefox WebDriver")
+  driver.quit()
+
 # Check BpmSupreme constructor argument validation
 def test_constructor():
   with Firefox() as driver:
@@ -24,3 +32,7 @@ def test_constructor():
     with pytest.raises(TypeError):
       BpmSupreme(driver, "username", driver)
       driver.close()
+
+# Check site_login()
+def test_site_login(account):
+  assert account.site_login() == True
