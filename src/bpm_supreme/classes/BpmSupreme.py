@@ -60,7 +60,7 @@ class BpmSupreme:
     time.sleep(sleep_time)
     return False
 
-  def site_login(self):
+  def login(self):
     """
     Logs into https://www.bpmsupreme.com using the defined user credentials
     
@@ -89,9 +89,7 @@ class BpmSupreme:
     if self.driver.current_url == "https://www.bpmsupreme.com/login":
       # Site login failed
       return False
-    
-    # Let login page load before exiting
-    self._load_page()
+      
     return True
           
   def download_library(self):
@@ -134,22 +132,30 @@ class BpmSupreme:
 
     Args:
       - none
+
+    Returns:
+      - True if successful page scroll
+      - False if unsuccessful page scroll
     """
     last_height = 1
     new_height = 0
     
-    while new_height <= last_height:
-      # Get scroll height.
-      last_height = self.driver.execute_script("return document.body.scrollHeight")
+    # Get scroll height.
+    last_height = self.driver.execute_script("return document.body.scrollHeight")
 
-      # Scroll down
-      self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-      # Wait to load the page.
-      time.sleep(BpmSupreme.SLEEP_INTERVAL * 10)
+    # Scroll down
+    self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+    # Wait to load the page.
+    self._load_page()
 
-      # Calculate new scroll height and compare with last scroll height.
-      new_height = self.driver.execute_script("return document.body.scrollHeight")
+    # Calculate new scroll height and compare with last scroll height.
+    new_height = self.driver.execute_script("return document.body.scrollHeight")
 
+    print("Document height changed from " + str(last_height) + " to " + str(new_height))
+
+    if new_height <= last_height:
+      return False
+    return True
 
 class Song():
   """

@@ -40,7 +40,7 @@ with Firefox(firefox_profile) as driver:
   # MAIN FUNCTION HERE
   # Log into account
   account = BpmSupreme.BpmSupreme(driver, USERNAME, PASSWORD)
-  account.site_login()
+  account.login()
 
   input("Press ENTER to begin downloading library...")
   account.download_library()

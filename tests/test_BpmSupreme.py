@@ -10,6 +10,9 @@ from src.bpm_supreme.classes.BpmSupreme import BpmSupreme
 
 @pytest.fixture
 def account(username, password):
+  """
+  Provides BpmSupreme account object
+  """
   driver = Firefox()
   account = BpmSupreme(driver, username, password)
   yield account
@@ -33,6 +36,13 @@ def test_constructor():
       BpmSupreme(driver, "username", driver)
       driver.close()
 
-# Check site_login()
-def test_site_login(account):
-  assert account.site_login() == True
+# Check login() and scroll_page()
+def test_login(account):
+  # Check login()
+  assert account.login() == True
+  
+  # Navigate to the download-history
+  account.driver.get("https://app.bpmsupreme.com/account/download-history")
+
+  # Check scroll_page()
+  assert account.scroll_page() == True
