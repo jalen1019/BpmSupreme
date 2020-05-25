@@ -31,9 +31,14 @@ class BpmSupreme:
       - password: Password string
     """
     # Check argument types
-    if isinstance(driver, Firefox) != True: raise expected_conditions.WebDriverException
-    if isinstance(username, str) != True: raise TypeError("Bad username arg type")
-    if isinstance(password, str) != True: raise TypeError("Bad password arg type")
+    # Check driver
+    if isinstance(driver, Firefox) != True: raise expected_conditions.WebDriverException(msg="Wrong type: {} for driver whereas a Firefox WebDriver is expected".format(type(driver)))
+
+    # Check username
+    if isinstance(username, str) != True: raise TypeError("Wrong type: {} for username whereas a str is expected".format(type(username)))
+    
+    # Check password
+    if isinstance(password, str) != True: raise TypeError("Wrong type: {} for password whereas a str is expected".format(type(password)))
     
     self.driver = driver
     self._username = username
@@ -89,7 +94,7 @@ class BpmSupreme:
     if self.driver.current_url == "https://www.bpmsupreme.com/login":
       # Site login failed
       return False
-      
+
     return True
           
   def download_library(self):
@@ -103,7 +108,7 @@ class BpmSupreme:
     # Navigate to download-history
     self.driver.get("https://app.bpmsupreme.com/account/download-history")
 
-    # Let the page load before exiting function
+    # Let the page load
     self._load_page()
     
     already_downloaded = set()
@@ -168,17 +173,23 @@ class Song():
     - name: Song name
     - artist: Song artist
   """
+
+  SLEEP_INTERVAL = 1.25
+  
   def __init__(self, driver, container):
     """
     Song constructor
     Args:
-      - driver: Selenium WebDriver object
+      - driver: Selenium Firefox WebDriver object
       - container: row-item WebElement
     """
     
     # Check argument types
-    if driver is not Firefox: raise expected_conditions.WebDriverException
-    if container is not expected_conditions.WebElement: raise TypeError
+    # Check driver type
+    if isinstance(driver, Firefox) != True : raise expected_conditions.WebDriverException(msg="Wrong type: {} for driver whereas a Firefox WebDriver is expected".format(type(driver)))
+    
+    # Check container type
+    if isinstance(container, expected_conditions.WebElement) != True: raise TypeError("Wrong type: {} for container whereas a WebElement is expected".format(type(container)))
 
     self.driver = driver
     self._container = container
