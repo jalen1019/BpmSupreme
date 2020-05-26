@@ -4,22 +4,28 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
 
 # Standard imports
 import time
 import getpass
+from os import listdir
 
 class BpmSupreme:  
   """
   Class representing a BPMSupreme account
   
   Methods:
+    - load_page()
     - site_login()
     - download_library()
     - scroll_page()
+    - detect_duplicates()
   """
 
-  SLEEP_INTERVAL = 1.25
+  # Amount of time to wait for a WebElement to load
+  TIMEOUT = 120
+  SCROLL_PAGE_WAIT_TIME = 5
   
   def __init__(self, driver, username, password):
     """
@@ -43,27 +49,6 @@ class BpmSupreme:
     self.driver = driver
     self._username = username
     self._password = password
-  
-  def _load_page(self, sleep_time=SLEEP_INTERVAL):
-    """
-    Utility function to wait for webpages to load
-
-    Args:
-      - sleep_time - Wait time if unable to detect loader class
-    """
-    # Spinning circle element
-    loader = self.driver.find_elements_by_xpath("//div[@class='loader']")
-    
-    # If detect loading element, wait until invisible
-    if len(loader) >= 1:
-      print("Loading " + self.driver.current_url)
-      for element in loader:
-        WebDriverWait(self.driver, sleep_time).until(expected_conditions.invisibility_of_element(element))
-      time.sleep(sleep_time)
-      return True
-
-    time.sleep(sleep_time)
-    return False
 
   def login(self):
     """
@@ -76,19 +61,26 @@ class BpmSupreme:
       - True if successful login
       - False if failed login
     """
-    # Get the login page and let the page load for five seconds
+    # Get the login page and let the page load
     self.driver.get("https://www.bpmsupreme.com/login")
-    self._load_page()
 
-    # Initialize username and password field variables
-    user_name_box = self.driver.find_element_by_id("login-form-email")
-    pass_box = self.driver.find_element_by_id("login-form-password")
+    WebDriverWait(self.driver, BpmSupreme.TIMEOUT).until(expected_conditions.invisibility_of_element((By.CLASS_NAME, "loader")))
+
+    WebDriverWait(self.driver, BpmSupreme.TIMEOUT).until(expected_conditions.element_to_be_clickable((By.ID, "login-form-email")))
+    
+    WebDriverWait(self.driver, BpmSupreme.TIMEOUT).until(expected_conditions.element_to_be_clickable((By.ID, "login-form-password")))
 
     # Input user credentials
+    user_name_box = self.driver.find_element(By.ID, "login-form-email")
     user_name_box.click()
-    user_name_box.send_keys(self._username + Keys.TAB)
+    user_name_box.send_keys(self._username)
+
+    # Input password credentials
+    pass_box = self.driver.find_element(By.ID, "login-form-password")
+    pass_box.click()
     pass_box.send_keys(self._password + Keys.ENTER)
-    self._load_page()
+
+    WebDriverWait(self.driver, BpmSupreme.TIMEOUT).until(expected_conditions.visibility_of_element_located((By.CSS_SELECTOR, ".account-menu-toggle")))
 
     # Check if site log in was successful
     if self.driver.current_url == "https://www.bpmsupreme.com/login":
@@ -97,7 +89,7 @@ class BpmSupreme:
 
     return True
           
-  def download_library(self):
+  def download_account_history(self):
     """
     Downloads account-history library
     
@@ -109,7 +101,7 @@ class BpmSupreme:
     self.driver.get("https://app.bpmsupreme.com/account/download-history")
 
     # Let the page load
-    self._load_page()
+    WebDriverWait(self.driver, BpmSupreme.TIMEOUT).until(((By.CLASS_NAME, "download-history")))
     
     already_downloaded = set()
     rows_on_page = set()
@@ -125,13 +117,13 @@ class BpmSupreme:
           continue
         song.download_song()
         already_downloaded.add(song)
-        print("Downloaded " + song.name + " by " + song.artist)
+        print("Downloaded " + song.artist + " - " + song.name)
 
       # Scroll down to the bottom of the page
       print("Scrolling to bottom of page")
       self.scroll_page()
   
-  def scroll_page(self):
+  def scroll_page(self, load_page_time=SCROLL_PAGE_WAIT_TIME):
     """
     Scrolls the page down.
 
@@ -142,24 +134,26 @@ class BpmSupreme:
       - True if successful page scroll
       - False if unsuccessful page scroll
     """
-    last_height = 1
+
+    WebDriverWait(self.driver, BpmSupreme.TIMEOUT).until(expected_conditions.invisibility_of_element((By.CLASS_NAME, "loader")))
+    
+    last_height = 60
     new_height = 0
     
-    # Get scroll height.
-    last_height = self.driver.execute_script("return document.body.scrollHeight")
+    while new_height <= last_height + 60:      
+      # Get scroll height.
+      last_height = self.driver.execute_script("return document.body.scrollHeight")
 
-    # Scroll down
-    self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    # Wait to load the page.
-    self._load_page()
+      # Scroll down
+      self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
-    # Calculate new scroll height and compare with last scroll height.
-    new_height = self.driver.execute_script("return document.body.scrollHeight")
+      time.sleep(1)
+
+      # Calculate new scroll height and compare with last scroll height.
+      new_height = self.driver.execute_script("return document.body.scrollHeight")
 
     print("Document height changed from " + str(last_height) + " to " + str(new_height))
 
-    if new_height <= last_height:
-      return False
     return True
 
 class Song():
@@ -195,11 +189,31 @@ class Song():
     self._container = container
 
     # Find child elements of row-item container matching song details
-    self.name = self._container.find_element_by_class_name("row-track-name").find_element_by_name("span").text
-    self.artist = self._container.find_element_by_class_name("row-artist").find_element_by_class_name("link").text
+    # Try to detect artist name
+    try:
+      track_name_container = self._container.find_element_by_class_name("row-track-name").find_element_by_css_selector("span")
+      self.name = track_name_container.text
+    
+    except NoSuchElementException:
+      print("Unable to detect track name from {}".format(self._container.tag_name))
+      self.name = "Unknown"
 
-    # Find download button of row-item
-    self.download_button = self._container.find_element_by_class_name("hide-mobile")
+    # Try to detect song name
+    try:
+      artists = []
+      for element in self._container.find_element_by_class_name("row-artist").find_elements_by_class_name("link"):
+        artists.append(element.text)
+      self.artist = ", ".join(artists)
+    except NoSuchElementException:
+      print("Unable to detect artist name from {}".format(self._container.tag_name))
+      self.artist = "Unknown"
+
+    # Try to find download button of song
+    try:
+      self.download_button = self._container.find_element_by_class_name("hide-mobile")
+    except NoSuchElementException:
+      print("Unable to detect download button for {} - {}".format(self.artist, self.name))
+      self.download_button = "Unknown"
 
   def __hash__(self):
     return hash((self._container))
@@ -215,46 +229,33 @@ class Song():
     Args:
       - none
     """
+    result = True
     try:
-      self.download_button.click()
-      # Find any class associated with a popup
-      popup = self.driver.find_elements_by_class_name("popup")
+      self.download_button.click()      
 
     except:
       print("Could not click download button!")
+      result = False
 
-    # If a popup has appeared, resolve the popup
-    if len(popup) != 0:
-      print("Detected max download popup! Attempting to resolve...")
-      time.sleep(BpmSupreme.SLEEP_INTERVAL)
+    # Try to detect popup
+    try:      
+      # Look for popup on screen
+      popup = WebDriverWait(self.driver, 1.25).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "popup_inner")))
+      
+      # Find useful popup elements
+      popup_text_title = popup.find_element_by_class_name("title")
+      close_button = popup.find_element_by_css_selector("div.close")
 
-      # Click close button on popup
-      for attempt in range(0,3):
-        # If there is no popup present on the page, exit the loop
-        if self.driver.find_elements_by_class_name("popup") == 0:
-          print("Popup no longer detected on page. Popup resolved...")
-          break
+      # Double check we're looking at the correct popup
+      if popup_text_title.text == "Download Limit":
+        result = False
+        print("Detected max download popup! Attempting to resolve...")
+        # Wait until close_button is clickable
+        WebDriverWait(self.driver, 120).until(expected_conditions.element_to_be_clickable((By.CSS_SELECTOR, "div.close")))
+        close_button.click()
 
-        try:
-          # Try to click the close button
-          self.driver.find_element_by_class_name("close").click()
-          break
-        
-        # Loop back around if unable to resolve on current attempt
-        except:
-          print("Could not resolve! (Attempt: " + str(attempt + 1) + " of 3")
+    # No popup has been detected
+    except TimeoutError:
+      pass
 
-  @property
-  def name(self):
-    """The name of the song"""
-    return self.name
-  
-  @property
-  def artist(self):
-    """The artist of the song"""
-    return self.artist
-
-  @property
-  def download_button(self):
-    """WebElement of download button of song"""
-    return self.download_button
+    return result
