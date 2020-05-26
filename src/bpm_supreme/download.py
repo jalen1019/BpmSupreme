@@ -43,4 +43,4 @@ with Firefox(firefox_profile) as driver:
   account.login()
 
   input("Press ENTER to begin downloading library...")
-  account.download_library()
+  account.download_account_history()
