@@ -13,7 +13,8 @@ import getpass
 from os import path
 from os import listdir
 
-from .classes import BpmSupreme
+from bpm_supreme.classes.BpmSupreme import BpmSupreme
+from bpm_supreme.classes.BpmSupreme import Song
 
 # Prompt for user credentials 
 USERNAME = input("Username:")
@@ -39,7 +40,7 @@ firefox_profile.set_preference("browser.safebrowsing.downloads.enabled", "false"
 with Firefox(firefox_profile) as driver:        
   # MAIN FUNCTION HERE
   # Log into account
-  account = BpmSupreme.BpmSupreme(driver, USERNAME, PASSWORD)
+  account = BpmSupreme(driver, USERNAME, PASSWORD, DOWNLOAD_PATH)
   account.login()
 
   input("Press ENTER to begin downloading library...")
