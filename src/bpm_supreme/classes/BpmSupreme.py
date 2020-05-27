@@ -164,12 +164,12 @@ class BpmSupreme:
 
     return True
 
-  def get_songs(self):
+  def get_songs(self, exclusions=set()):
     """
     Returns all current songs on the page
 
     Args:
-      - None
+      - exclusions - Set object containing WebElements that should be excluded
     
     Returns:
       - Set object containing all current songs on the page
