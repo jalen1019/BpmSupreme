@@ -112,7 +112,7 @@ class BpmSupreme:
     self.driver.get("https://app.bpmsupreme.com/account/download-history")
 
     # Let the page load
-    WebDriverWait(self.driver, BpmSupreme.TIMEOUT).until(((By.CLASS_NAME, "download-history")))
+    WebDriverWait(self.driver, BpmSupreme.TIMEOUT).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "download-history")))
     
     songs_on_page = set()
     songs_to_skip = set()
