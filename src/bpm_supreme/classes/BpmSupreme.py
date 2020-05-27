@@ -156,6 +156,25 @@ class BpmSupreme:
 
     return True
 
+  def get_songs(self):
+    """
+    Returns all current songs on the page
+
+    Args:
+      - None
+    
+    Returns:
+      - Set object containing all current songs on the page
+    """
+    WebDriverWait(self.driver, 120).until(expected_conditions.visibility_of_all_elements_located((By.CLASS_NAME, "row-item")))
+    row_items = self.driver.find_elements_by_class_name("row-item")
+    
+    # Add all songs on page to set
+    library = set()
+    for item in row_items:
+      library.add(Song(self.driver, item))
+    return library
+
 class Song():
   """
   Object representing a BPMSupreme song
