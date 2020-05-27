@@ -9,7 +9,7 @@ from selenium.webdriver.common.by import By
 # Standard imports
 import time
 import getpass
-from os import listdir
+import os
 
 class BpmSupreme:  
   """
@@ -27,7 +27,7 @@ class BpmSupreme:
   TIMEOUT = 120
   SCROLL_PAGE_WAIT_TIME = 5
   
-  def __init__(self, driver, username, password):
+  def __init__(self, driver, username, password, path):
     """
     Constructor for BpmSupreme object
 
@@ -45,10 +45,20 @@ class BpmSupreme:
     
     # Check password
     if isinstance(password, str) != True: raise TypeError("Wrong type: {} for password whereas a str is expected".format(type(password)))
+
+    # Check path is string
+    if isinstance(path, str) != True:
+      raise TypeError("Wrong type: Expected str for path; Got {}".format(type(path)))
+
+    # Check path is valid
+    if os.path.isdir(path) != True:
+      raise ValueError("Bad path: Expected valid path for path")
     
     self.driver = driver
     self._username = username
     self._password = password
+    self.path = path
+    self.local_library = self.update_library(self.path)
 
   def login(self):
     """
@@ -174,6 +184,53 @@ class BpmSupreme:
     for item in row_items:
       library.add(Song(self.driver, item))
     return library
+
+  def update_library(self, path='.'):
+    """
+    Initialize a library of current songs using path.
+    Sets the "library" property equal a string set of all song
+    names within path.
+
+    Args:
+      - path: string path to directory to check for duplicates
+
+    Returns:
+      - set containing all song names detected within path
+    """
+    # Check that path is valid
+    if os.path.isdir(path) == False:
+      raise ValueError("Error: Invalid path provided")
+    
+    library = set()
+    with os.scandir(path) as entries:
+      for entry in entries:
+        file_song_title = entry.name.split(sep=".mp3")[0].split(sep="-")[-1].strip()
+        library.add(file_song_title)
+
+    return library
+
+  def check_duplicate(self, song, path='.'):
+    """
+    Check if duplicate file detected within path
+
+    Args:
+      - song: song to check for in path
+      - path: string path to directory to check for duplicates
+    
+    Returns:
+      True if found duplicate, else returns False
+    """    
+
+    if isinstance(song, Song) == False:
+      raise TypeError("Expected argument of type Song() for arg song, instead got {}".format(type(song)))
+    
+    for song_name in self.local_library:
+      if song.name == song_name:
+        # Duplicate song name found in library
+        return True
+
+    # No duplicate song found in library
+    return False
 
 class Song():
   """
