@@ -3,6 +3,7 @@ from selenium.webdriver import Firefox
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import JavascriptException
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -112,31 +113,35 @@ class BpmSupreme:
     self.driver.get("https://app.bpmsupreme.com/account/download-history")
 
     # Let the page load
-    WebDriverWait(self.driver, BpmSupreme.TIMEOUT).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "download-history")))
+    WebDriverWait(self.driver, BpmSupreme.TIMEOUT).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "table-media")))
     
-    songs_on_page = set()
-    songs_to_skip = set()
+    current_song = Song(self.driver, self.driver.execute_script("\
+    return document.getElementsByClassName('table-media')[0].firstChild.firstChild;\
+    "))
     failed_downloads = set()
-    finished_downloading = False
-    while not finished_downloading:
-      songs_on_page = self.get_songs(exclusions=songs_to_skip)
-      if songs_on_page == songs_to_skip:
-        break
-    
-      for song_on_page in songs_on_page:
-        if song_on_page in songs_to_skip:
+    try:
+      while current_song.get_next_song():    
+        # If current song is a duplicate, track it
+        if self.check_duplicate(current_song):
+          print("Skipped duplicate: {} - {}".format(current_song.artist, current_song.name))
+          failed_downloads.add(current_song)
+          current_song = current_song.get_next_song()
           continue
-        if self.check_duplicate(song_on_page):
-          continue
-        print("Downloading {} - {}".format(song_on_page.artist, song_on_page.name))
-        if song_on_page.download_song() == False:
-          print("Could not download: {} - {}".format(song_on_page.artist, song_on_page.name))
-          failed_downloads.add(song_on_page)
-        songs_to_skip.add(song_on_page)
-      self.scroll_page()
-    for song in failed_downloads:
-      print("Failed to download: {} - {}".format(song.artist, song.name))
-    print("{} songs were skipped".format(len(failed_downloads)))
+        print("Downloading {} - {}".format(current_song.artist, current_song.name))
+        if current_song.download_song() == False:
+          print("Could not download {} - {}".format(current_song.artist, current_song.name))
+
+        while self.scroll_page() != True:
+          pass
+
+        current_song = current_song.get_next_song()
+    except JavascriptException:
+      for song in failed_downloads:
+        print("Failed to download: {} - {}".format(song.artist, song.name))
+      print("{} songs were skipped".format(len(failed_downloads)))
+      if len(self.local_library) < len(failed_downloads):
+        print("Did not download all songs!")
+
   
   def scroll_page(self, load_page_time=SCROLL_PAGE_WAIT_TIME):
     """
@@ -155,7 +160,7 @@ class BpmSupreme:
     last_height = 60
     new_height = 0
     
-    while new_height <= last_height + 60:      
+    if new_height <= last_height + 60:      
       # Get scroll height.
       last_height = self.driver.execute_script("return document.body.scrollHeight")
 
@@ -166,33 +171,12 @@ class BpmSupreme:
 
       # Calculate new scroll height and compare with last scroll height.
       new_height = self.driver.execute_script("return document.body.scrollHeight")
-
-    print("Document height changed from " + str(last_height) + " to " + str(new_height))
-
+    
+    if new_height <= last_height + 60:
+      return False
+    
     return True
 
-  def get_songs(self, exclusions=set()):
-    """
-    Returns all current songs on the page
-
-    Args:
-      - exclusions - Set object containing WebElements that should be excluded
-    
-    Returns:
-      - Set object containing all current songs on the page
-    """
-    # Type check for exclusions
-    if isinstance(exclusions, set) != True:
-      raise TypeError("Bad type: Expected set() for exclusions arg; got {} instead".format(type(exclusions)))
-    
-    row_items = set(self.driver.find_elements_by_class_name("row-item"))
-    row_items.discard(exclusions)
-    
-    # Add all songs on page to set
-    library = set()
-    for item in row_items:
-      library.add(Song(self.driver, item))
-    return library
 
   def update_library(self):
     """
@@ -217,13 +201,12 @@ class BpmSupreme:
 
     return library
 
-  def check_duplicate(self, song, path='.'):
+  def check_duplicate(self, song):
     """
-    Check if duplicate file detected within path
+    Check if duplicate file detected within self.local_library
 
     Args:
       - song: song to check for in path
-      - path: string path to directory to check for duplicates
     
     Returns:
       True if found duplicate, else returns False
@@ -312,6 +295,9 @@ class Song():
 
     Args:
       - none
+    
+    Returns:
+      - True if successful, else False
     """
     result = True
     try:
@@ -343,3 +329,20 @@ class Song():
       pass
 
     return result
+
+  def get_next_song(self):
+    """
+    Returns the next sibling of current song using current_song container WebElement
+
+    Args:
+      - none 
+
+    Returns:
+      Next row-item container based on the current_song
+    """
+    return Song(self.driver, self.driver.execute_script("\
+      if (arguments[0].parentNode.nextSibling.children[0]) {\
+        return arguments[0].parentNode.nextSibling.children[0];\
+      }\
+      return false;\
+      ", self._container))
