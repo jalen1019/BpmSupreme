@@ -45,12 +45,12 @@ if __name__ == "__main__":
     # MAIN FUNCTION HERE
     # Log into account
     account = BpmSupreme(driver, USERNAME, PASSWORD, DOWNLOAD_PATH)
-    account.login()
+    assert account.login()
 
     with os.scandir(DOWNLOAD_PATH) as entries:
       for entry in entries:
         print("Detected file: {}".format(entry.name))
-    if input("Is this correct? (y/n)") != "y":
+    if input("Is this correct? (y/n): ") != "y":
       print("Exiting...")
 
     input("Press ENTER to begin downloading library...")
