@@ -85,7 +85,7 @@ class BpmSupreme:
     # Check if site log in was successful
     if self.driver.current_url == "https://www.bpmsupreme.com/login":
       # Site login failed
-      return False
+      raise ValueError("Could not log into account using credentials:\nUser: {}\n Password: {}".format(self._username, self._password))
 
     return True
           
