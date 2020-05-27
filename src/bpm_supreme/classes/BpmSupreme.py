@@ -2,6 +2,7 @@
 from selenium.webdriver import Firefox
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -113,24 +114,21 @@ class BpmSupreme:
     # Let the page load
     WebDriverWait(self.driver, BpmSupreme.TIMEOUT).until(((By.CLASS_NAME, "download-history")))
     
-    already_downloaded = set()
-    rows_on_page = set()
-    songs_to_download = set()
+    songs_on_page = set()
+    songs_to_skip = set()
     while True:
-      # Add all current songs to a set
-      rows_on_page = self.driver.find_elements_by_class_name("row-item")
-      for row in rows_on_page:
-        songs_to_download.add(Song(self.driver, row))
-      
-      for song in songs_to_download:
-        if song in already_downloaded:
+      songs_on_page.update(self.get_songs())
+    
+      for song_on_page in songs_on_page:
+        if song_on_page in songs_to_skip:
           continue
-        song.download_song()
-        already_downloaded.add(song)
-        print("Downloaded " + song.artist + " - " + song.name)
-
-      # Scroll down to the bottom of the page
-      print("Scrolling to bottom of page")
+        if self.check_duplicate(song_on_page):
+          print("Detected duplicate: {} - {}".format(song_on_page.artist, song_on_page.name))
+          continue
+        print("Downloading {} - {}".format(song_on_page.artist, song_on_page.name))
+        if song_on_page.download_song() == False:
+          print("Could not download: {} - {}".format(song_on_page.artist, song_on_page.name))
+      songs_to_skip.add(song_on_page)
       self.scroll_page()
   
   def scroll_page(self, load_page_time=SCROLL_PAGE_WAIT_TIME):
@@ -145,7 +143,7 @@ class BpmSupreme:
       - False if unsuccessful page scroll
     """
 
-    WebDriverWait(self.driver, BpmSupreme.TIMEOUT).until(expected_conditions.invisibility_of_element((By.CLASS_NAME, "loader")))
+    WebDriverWait(self.driver, load_page_time).until(expected_conditions.invisibility_of_element((By.CLASS_NAME, "loader")))
     
     last_height = 60
     new_height = 0
@@ -315,11 +313,11 @@ class Song():
     # Try to detect popup
     try:      
       # Look for popup on screen
-      popup = WebDriverWait(self.driver, 1.25).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "popup_inner")))
+      popup = WebDriverWait(self.driver, 2.5).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "popup_inner")))
       
       # Find useful popup elements
-      popup_text_title = popup.find_element_by_class_name("title")
-      close_button = popup.find_element_by_css_selector("div.close")
+      popup_text_title = WebDriverWait(self.driver, 2.5).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "title")))
+      close_button = WebDriverWait(self.driver, 2.5).until(expected_conditions.element_to_be_clickable((By.CSS_SELECTOR, "div.close")))
 
       # Double check we're looking at the correct popup
       if popup_text_title.text == "Download Limit":
@@ -330,7 +328,7 @@ class Song():
         close_button.click()
 
     # No popup has been detected
-    except TimeoutError:
+    except TimeoutException:
       pass
 
     return result
