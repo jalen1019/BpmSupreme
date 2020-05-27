@@ -72,36 +72,26 @@ class TestSong():
         Song(driver, "WebElement")
         driver.close()
 
-  def test_download_song(self, account, song_name, username, password):
+  def test_download_song(self, account, bad_song_name):
     # Log into account
-    assert account.login(), \
-      "Could not log into account using credentials:\nUser: {}\nPassword: {}".format(username, password) 
+    assert account.login()
 
     # Navigate to the download-history
     account.driver.get("https://app.bpmsupreme.com/account/download-history")
     
-    # Attempt to download the first item on the page
-    def get_songs():
-      WebDriverWait(account.driver, 120).until(expected_conditions.visibility_of_all_elements_located((By.CLASS_NAME, "row-item")))
-      row_items = account.driver.find_elements_by_class_name("row-item")
-      # Add all songs on page to set
-      library = set()
-      for item in row_items:
-        library.add(Song(account.driver, item))
-      return library
-    
-    library = get_songs()
+    library = account.get_songs()
     for song in library:
       print("Detected: {} - {}".format(song.artist, song.name))
     assert account.scroll_page()
-    print("Songs detected on page: " + str(len(get_songs())))
-    assert len(get_songs()) > 40
+    print("Songs detected on page: " + str(len(account.get_songs())))
+    assert len(account.get_songs()) > 40
     
-    # Attempt to download `song-name` config option
+    # Attempt to download `bad-song-name` config option
     song_found = False
     for song in get_songs():
-      if song.name == song_name:
+      if song.name == bad_song_name:
         song_found = True
-        assert song.download_song(), "Could not download the song!"
+        assert song.download_song() == False, "Expected download to fail!"
 
     assert song_found, "The song could not be found on the page"
+
