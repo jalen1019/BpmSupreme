@@ -117,7 +117,7 @@ class BpmSupreme:
     songs_on_page = set()
     songs_to_skip = set()
     while True:
-      songs_on_page.difference_update(self.get_songs())
+      songs_on_page.difference_update(self.get_songs(exclusions=songs_to_skip))
     
       for song_on_page in songs_on_page:
         if song_on_page in songs_to_skip:
