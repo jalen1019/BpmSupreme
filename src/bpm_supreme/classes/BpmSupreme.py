@@ -116,8 +116,12 @@ class BpmSupreme:
     
     songs_on_page = set()
     songs_to_skip = set()
-    while True:
-      songs_on_page.difference_update(self.get_songs(exclusions=songs_to_skip))
+    failed_downloads = set()
+    finished_downloading = False
+    while not finished_downloading:
+      songs_on_page = self.get_songs(exclusions=songs_to_skip)
+      if songs_on_page == songs_to_skip:
+        break
     
       for song_on_page in songs_on_page:
         if song_on_page in songs_to_skip:
@@ -127,9 +131,12 @@ class BpmSupreme:
         print("Downloading {} - {}".format(song_on_page.artist, song_on_page.name))
         if song_on_page.download_song() == False:
           print("Could not download: {} - {}".format(song_on_page.artist, song_on_page.name))
+          failed_downloads.add(song_on_page)
         songs_to_skip.add(song_on_page)
       self.scroll_page()
-    print("{} songs were skipped".format(len(songs_to_skip)))
+    for song in failed_downloads:
+      print("Failed to download: {} - {}".format(song.artist, song.name))
+    print("{} songs were skipped".format(len(failed_downloads)))
   
   def scroll_page(self, load_page_time=SCROLL_PAGE_WAIT_TIME):
     """
