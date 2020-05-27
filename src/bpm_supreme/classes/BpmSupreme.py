@@ -58,7 +58,7 @@ class BpmSupreme:
     self._username = username
     self._password = password
     self.path = path
-    self.local_library = self.update_library(self.path)
+    self.local_library = self.update_library()
 
   def login(self):
     """
@@ -185,11 +185,10 @@ class BpmSupreme:
       library.add(Song(self.driver, item))
     return library
 
-  def update_library(self, path='.'):
+  def update_library(self):
     """
     Initialize a library of current songs using path.
-    Sets the "library" property equal a string set of all song
-    names within path.
+    Returns a set containing all song names within path
 
     Args:
       - path: string path to directory to check for duplicates
@@ -198,11 +197,11 @@ class BpmSupreme:
       - set containing all song names detected within path
     """
     # Check that path is valid
-    if os.path.isdir(path) == False:
+    if os.path.isdir(self.path) == False:
       raise ValueError("Error: Invalid path provided")
     
     library = set()
-    with os.scandir(path) as entries:
+    with os.scandir(self.path) as entries:
       for entry in entries:
         file_song_title = entry.name.split(sep=".mp3")[0].split(sep="-")[-1].strip()
         library.add(file_song_title)
