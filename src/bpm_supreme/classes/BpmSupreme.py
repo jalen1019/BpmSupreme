@@ -174,12 +174,12 @@ class BpmSupreme:
     Returns:
       - Set object containing all current songs on the page
     """
-    WebDriverWait(self.driver, 120).until(expected_conditions.visibility_of_all_elements_located((By.CLASS_NAME, "row-item")))
-    row_items = self.driver.find_elements_by_class_name("row-item")
-
     # Type check for exclusions
     if isinstance(exclusions, set) != True:
       raise TypeError("Bad type: Expected set() for exclusions arg; got {} instead".format(type(exclusions)))
+    
+    row_items = set(self.driver.find_elements_by_class_name("row-item"))
+    row_items.discard(exclusions)
     
     # Add all songs on page to set
     library = set()
