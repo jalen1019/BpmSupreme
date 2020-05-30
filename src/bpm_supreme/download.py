@@ -10,7 +10,6 @@ from selenium.common.exceptions import NoSuchElementException
 
 import time
 import getpass
-import importlib.util
 import sys
 import os
 
