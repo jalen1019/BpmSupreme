@@ -53,5 +53,5 @@ if __name__ == "__main__":
     if input("Is this correct? (y/n): ") != "y":
       print("Exiting...")
 
-    input("Press ENTER to begin downloading library...")
-    account.download_account_history()
+    page_count = input("How many pages of the new releases to download: ")
+    account.download_new_releases(int(page_count))
