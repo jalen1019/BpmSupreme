@@ -242,7 +242,7 @@ class BpmSupreme:
         try:
           current_song = self.driver.execute_script(
           """
-          return arguments[0].parentNode.parentNode.nextSibling.getElementsByClassName('row-item')[0]
+          arguments[0].parentNode.parentNode.nextSibling.getElementsByClassName('row-item')[0] ? return arguments[0].parentNode.parentNode.nextSibling.getElementsByClassName('row-item')[0] : return false
           """, current_song)
         except JavascriptException:
           print("Reached end of page: {}".format(page + 1))
