@@ -115,9 +115,16 @@ class BpmSupreme:
     # Let the page load
     WebDriverWait(self.driver, BpmSupreme.TIMEOUT).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "table-media")))
     
-    current_song = Song(self.driver, self.driver.execute_script("\
-    return document.getElementsByClassName('table-media')[0].firstChild.firstChild;\
-    "))
+    # Initialize the current song to first row-container of div.table-media
+    current_song = Song(self.driver, self.driver.execute_script(
+    """
+      return document.getElementsByClassName('table-media')[0].firstChild.firstChild;
+    """), self.driver.find_element_by_class_name(
+    """
+      return document.getElementsByClassName('table-media')[0].firstChild.firstChild;
+    """).find_element_by_class_name("hide-mobile"))
+    
+    # Define tracker for songs that failed the Song.download_song() method
     failed_downloads = set()
     try:
       while current_song.get_next_song():    
@@ -237,7 +244,7 @@ class Song():
 
   SLEEP_INTERVAL = 1.25
   
-  def __init__(self, driver, container):
+  def __init__(self, driver, container, download_button):
     """
     Song constructor
     Args:
@@ -250,10 +257,15 @@ class Song():
     if isinstance(driver, Firefox) != True : raise expected_conditions.WebDriverException(msg="Wrong type: {} for driver whereas a Firefox WebDriver is expected".format(type(driver)))
     
     # Check container type
-    if isinstance(container, expected_conditions.WebElement) != True: raise TypeError("Wrong type: {} for container whereas a WebElement is expected".format(type(container)))
+    if isinstance(container, expected_conditions.WebElement) != True: raise TypeError("Wrong type: {} for container whereas a set is expected".format(type(container)))
+
+    # Check download_button_type
+    if isinstance(download_button, expected_conditions.WebElement) != True:
+      raise TypeError("Wrong type: Expected WebElement for download_button; Got {}".format(type(download_button)))
 
     self.driver = driver
     self._container = container
+    self.download_button = download_button
 
     # Find child elements of row-item container matching song details
     # Try to detect artist name
@@ -274,13 +286,6 @@ class Song():
     except NoSuchElementException:
       print("Unable to detect artist name from {}".format(self._container.tag_name))
       self.artist = "Unknown"
-
-    # Try to find download button of song
-    try:
-      self.download_button = self._container.find_element_by_class_name("hide-mobile")
-    except NoSuchElementException:
-      print("Unable to detect download button for {} - {}".format(self.artist, self.name))
-      self.download_button = "Unknown"
 
   def __hash__(self):
     return hash((self._container))
