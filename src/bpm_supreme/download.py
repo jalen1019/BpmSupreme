@@ -33,7 +33,7 @@ if __name__ == "__main__":
   firefox_profile = FirefoxProfile()
   firefox_profile.set_preference("browser.helperApps.neverAsk.openFile", "true")
   firefox_profile.set_preference("browser.helperApps.neverAsk.saveFile", "true")
-  firefox_profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "true")
+  firefox_profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "audio/mpeg,audio/mp3")
   firefox_profile.set_preference("browser.download.dir", DOWNLOAD_PATH)
   firefox_profile.set_preference("browser.download.folderList", 2)
   firefox_profile.set_preference("browser.download.manager.showWhenStarting", "false")
