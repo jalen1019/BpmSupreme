@@ -265,6 +265,24 @@ class BpmSupreme:
       except JavascriptException(stacktrace=True):
         print("Unable to reach next page")
         break
+
+  def download_exclusives(self, page_count):
+    """
+    Download exclusives page from BpmSupreme New Releases > Exclusives
+  
+    Args:
+      - page_count: Number of pages from 1 to page_count
+    
+    Returns:
+      - none
+  
+    Order of song priority:
+    Dirty short and dirty extended
+    If none, get dirty
+    If no dirty, get clean
+    If no clean, get clean extended and clean short edit
+    """
+    pass
   
   def scroll_page(self, load_page_time=SCROLL_PAGE_WAIT_TIME):
     """
