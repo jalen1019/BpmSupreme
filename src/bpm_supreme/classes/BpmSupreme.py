@@ -461,9 +461,10 @@ class Song():
     Returns:
       Next row-item container based on the current_song
     """
-    return Song(self.driver, self.driver.execute_script("\
-      if (arguments[0].parentNode.nextSibling.children[0]) {\
-        return arguments[0].parentNode.nextSibling.children[0];\
-      }\
-      return false;\
-      ", self._container))
+    return self.driver.execute_script(
+      """
+        if (arguments[0].parentNode.nextSibling.children[0]) {
+          return arguments[0].parentNode.nextSibling.children[0];
+        }
+        return false;
+      """)
