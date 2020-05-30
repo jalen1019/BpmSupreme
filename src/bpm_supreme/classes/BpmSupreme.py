@@ -149,6 +149,122 @@ class BpmSupreme:
       if len(self.local_library) < len(failed_downloads):
         print("Did not download all songs!")
 
+  def download_new_releases(self, page_count):
+    # Get the new-releases page
+    self.driver.get("https://app.bpmsupreme.com/new-releases/audio/hip-hop-r%26b")
+
+    # Wait until a .row-container is ready to be clickable
+    WebDriverWait(self.driver, BpmSupreme.TIMEOUT).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "row-container")))
+
+    # Per amount of pages to download
+    for page in range(page_count):
+      WebDriverWait(self.driver, BpmSupreme.TIMEOUT).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "row-container")))
+
+      # Initialize current_song to first row-item container on the page
+      current_song = self.driver.execute_script(
+      """
+        return document.getElementsByClassName('table-media')[0].firstChild.firstChild.firstChild
+      """)
+      
+      # While there is a next row-item
+      while current_song:
+        # Initialize booleans for duplicate detection on "Quick Hit Dirty" and "Intro Dirty" song versions
+        quick_hit_dirty_is_duplicate = False
+        intro_dirty_is_duplicate = False
+        intro_dirty_is_present = True
+        quick_hit_dirty_is_present = True
+      
+        # Find the "Intro Dirty" and "Quick Hit Dirty" download buttons
+        song_versions = self.driver.execute_script(
+        """
+          return arguments[0].getElementsByClassName('tag-link')
+        """, current_song
+        )
+
+        # Attempt to find "intro dirty" download button
+        try:
+          intro_dirty = Song(self.driver, current_song, self.driver.execute_script(
+          """
+            for(var i = 0; i < arguments[0].length; ++i) {
+              if (arguments[0][i].innerText == 'Intro Dirty')
+                return arguments[0][i];
+            }
+            return null;
+          """, song_versions))
+
+        except JavascriptException:
+          print("Failed finding 'Intro Dirty' download button for {} - {}".format(intro_dirty.artist, intro_dirty.name))
+          intro_dirty_is_present = False
+        
+        except TypeError:
+          print("Failed finding 'Intro Dirty' button for {} - {}".format(intro_dirty.artist, intro_dirty.name))
+          intro_dirty_is_present = False
+
+        # Attempt to find "quick hit dirty" download button
+        try:
+          quick_hit_dirty = Song(self.driver, current_song, self.driver.execute_script(
+          """
+            for(var i = 0; i < arguments[0].length; ++i) {
+              if (arguments[0][i].innerText == 'Quick Hit Dirty')
+                return arguments[0][i];
+            }
+            return null;
+          """, song_versions))
+        
+        except JavascriptException:
+          print("Failed finding download 'Quick Hit Dirty' button for {} - {}".format(quick_hit_dirty.artist, quick_hit_dirty.name))
+          quick_hit_dirty_is_present = False
+
+        except TypeError:
+          print("Failed finding download 'Quick Hit Dirty' button for {} - {}".format(intro_dirty.artist, intro_dirty.name))
+          quick_hit_dirty_is_present = False
+
+        # Only check for duplicates if there is an existing download button for it
+        if intro_dirty_is_present:
+          # Check for duplicates
+          intro_dirty.name += " (Intro Dirty)"
+          intro_dirty_is_duplicate = self.check_duplicate(intro_dirty)
+        
+        if quick_hit_dirty_is_present:
+          quick_hit_dirty.name += " (Quick Hit Dirty)"
+          quick_hit_dirty_is_duplicate = self.check_duplicate(quick_hit_dirty)
+
+        # Download songs if not duplicate
+        if not intro_dirty_is_duplicate and intro_dirty_is_present:
+          print("Downloading: {} - {}".format(intro_dirty.artist, intro_dirty.name))
+          intro_dirty.download_song()
+          
+        if not quick_hit_dirty_is_duplicate and quick_hit_dirty_is_present:
+          print("Downloading: {} - {}".format(quick_hit_dirty.artist, quick_hit_dirty.name))          
+          quick_hit_dirty.download_song()
+        
+        # Set current_song to next song
+        try:
+          current_song = self.driver.execute_script(
+          """
+          return arguments[0].parentNode.parentNode.nextSibling.getElementsByClassName('row-item')[0]
+          """, current_song)
+        except JavascriptException:
+          print("Reached end of page: {}".format(page + 1))
+          current_song = None
+        
+      # Find and click the next page button
+      try:
+        WebDriverWait(self.driver, BpmSupreme.TIMEOUT).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "pagination")))
+        pagination = self.driver.find_element_by_class_name("pagination").find_elements_by_tag_name("li")
+        next_page = self.driver.execute_script(
+        """
+          for (var i = 0; i < arguments[0].length; ++i) {
+            if (arguments[0][i].innerText === '›') {
+              return arguments[0][i].firstChild
+            }
+          }
+          return null
+        """, pagination)
+        next_page.click()
+      except JavascriptException(stacktrace=True):
+        print("Unable to reach next page")
+        break
   
   def scroll_page(self, load_page_time=SCROLL_PAGE_WAIT_TIME):
     """
