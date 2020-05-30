@@ -191,7 +191,7 @@ class BpmSupreme:
     Returns a set containing all song names within path
 
     Args:
-      - path: string path to directory to check for duplicates
+      - None
 
     Returns:
       - set containing all song names detected within path
