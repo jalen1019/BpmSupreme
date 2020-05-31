@@ -282,7 +282,44 @@ class BpmSupreme:
     If no dirty, get clean
     If no clean, get clean extended and clean short edit
     """
-    pass
+    # Get the exclusives page
+    self.driver.get("https://app.bpmsupreme.com/new-releases/audio/exclusives")
+
+    # Wait until a .row container is ready to be clickable
+    WebDriverWait(self.driver, BpmSupreme.TIMEOUT).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "row-container")))
+
+    # Per amount of pages to download
+    for page in range(page_count):
+      WebDriverWait(self.driver, BpmSupreme.TIMEOUT).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "row-container")))
+
+      # Initialize current_song to first row-item container on the page
+      current_song = self.driver.execute_script(
+      """
+        return document.getElementsByClassName('table-media')[0].firstChild.firstChild.firstChild
+      """)  
+
+      # While there is a next row-item
+      while current_song:
+        # Find all song versions 
+        song_versions = self.driver.execute_script(
+          """
+            return arguments[0].getElementsByClassName('tag-link')
+          """, current_song
+        )
+
+        # Attempt to find "Dirty Short" and "Dirty Extended" download buttons
+        try:
+          self.driver.execute_script(
+            """
+              for(var i = 0; i < arguments[0].length; ++i) {
+              if (arguments[0][i].innerText == 'Intro Dirty')
+                return arguments[0][i];
+            }
+            return null;
+            """, song_versions
+          )
+        except JavascriptException or TypeError:
+          print("Could not find download button for {} - {}".format())
   
   def scroll_page(self, load_page_time=SCROLL_PAGE_WAIT_TIME):
     """
