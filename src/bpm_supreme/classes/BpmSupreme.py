@@ -309,17 +309,64 @@ class BpmSupreme:
 
         # Attempt to find "Dirty Short" and "Dirty Extended" download buttons
         try:
-          self.driver.execute_script(
+          dirty_short_and_dirty_extended_is_present = self.driver.execute_script(
             """
+              window.dirty_short_present = false;
+              window.dirty_extended_present = false;
               for(var i = 0; i < arguments[0].length; ++i) {
-              if (arguments[0][i].innerText == 'Intro Dirty')
-                return arguments[0][i];
-            }
-            return null;
+                if (arguments[0][i].innerText == 'Dirty Short') {
+                  arguments[0][i].click();
+                  window.dirty_short_present = true;
+                  continue;
+                }
+                if (arguments[0][i].innerText == 'Dirty Extended') {
+                  arguments[0][i].click();
+                  window.dirty_extended_present = true;
+                  continue;
+                }
+              }
+            return window.dirty_short_present && window.dirty_extended_present;
             """, song_versions
           )
         except JavascriptException or TypeError:
-          print("Could not find download button for {} - {}".format())
+          print("Could not find neither 'Dirty Short' nor 'Dirty Extended' download buttons")
+
+        if dirty_short_and_dirty_extended_is_present:
+          break
+
+        try:
+          get_dirty = self.driver.execute_script(
+            """
+              for(var i = 0; i < arguments[0].length; ++i) {
+                if (arguments[0][i].innerText == 'Dirty') {
+                  arguments[0][i].click();
+                  return true;
+                }
+              }
+              return null;
+            """
+          )
+        except JavascriptException or TypeError:
+          print("Coud not find 'Dirty' download button")
+
+        if get_dirty:
+          break
+
+        try:
+          get_clean = self.driver.execute_script(
+            """
+              for(var i = 0; i < arguments[0].length; ++i) {
+                if (arguments[0][i].innerText == 'Clean') {
+                  arguments[0][i].click();
+                  return true;
+                }
+              }
+              return null;
+            """
+          )
+
+          except JavascriptException or TypeError:
+
   
   def scroll_page(self, load_page_time=SCROLL_PAGE_WAIT_TIME):
     """
