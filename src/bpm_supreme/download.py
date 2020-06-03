@@ -22,12 +22,23 @@ if __name__ == "__main__":
   # Prompt for user credentials 
   USERNAME = input("Username: ")
   PASSWORD = getpass.getpass()
+  DUPLICATE_PATH = str()
   DOWNLOAD_PATH = str()
 
   while not os.path.isdir(DOWNLOAD_PATH):
     DOWNLOAD_PATH = input("Download file path: ")
   
   with os.scandir(DOWNLOAD_PATH) as entries:
+    for entry in entries:
+      print("Detected file: {}".format(entry.name))
+  if input("Is this correct? (y/n): ") != "y":
+    print("Exiting...")
+    exit
+
+  while not os.path.isdir(DUPLICATE_PATH):
+    DUPLICATE_PATH = input("Path to current library: ")
+  
+  with os.scandir(DUPLICATE_PATH) as entries:
     for entry in entries:
       print("Detected file: {}".format(entry.name))
   if input("Is this correct? (y/n): ") != "y":
@@ -50,7 +61,7 @@ if __name__ == "__main__":
   with Firefox(firefox_profile) as driver:        
     # MAIN FUNCTION HERE
     # Log into account
-    account = BpmSupreme(driver, USERNAME, PASSWORD, DOWNLOAD_PATH)
+    account = BpmSupreme(driver, USERNAME, PASSWORD, DUPLICATE_PATH)
     assert account.login()
         
     page_count = input("How many pages of the new releases to download: ")
