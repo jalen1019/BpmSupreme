@@ -295,7 +295,7 @@ class BpmSupreme:
       # Initialize current_song to first row-item container on the page
       current_song = self.driver.execute_script(
       """
-        return document.getElementsByClassName('table-media')[0].firstChild.firstChild.firstChild
+        return document.getElementsByClassName('table-media')[0].firstChild.firstChild.firstChild.getElementsByClassName('row-item')[0]
       """)  
 
       # While there is a next row-item
@@ -307,66 +307,91 @@ class BpmSupreme:
           """, current_song
         )
 
-        # Attempt to find "Dirty Short" and "Dirty Extended" download buttons
-        try:
-          dirty_short_and_dirty_extended_is_present = self.driver.execute_script(
-            """
-              window.dirty_short_present = false;
-              window.dirty_extended_present = false;
-              for(var i = 0; i < arguments[0].length; ++i) {
-                if (arguments[0][i].innerText == 'Dirty Short') {
-                  arguments[0][i].click();
-                  window.dirty_short_present = true;
-                  continue;
-                }
-                if (arguments[0][i].innerText == 'Dirty Extended') {
-                  arguments[0][i].click();
-                  window.dirty_extended_present = true;
-                  continue;
-                }
-              }
-            return window.dirty_short_present && window.dirty_extended_present;
-            """, song_versions
-          )
-        except JavascriptException or TypeError:
-          print("Could not find neither 'Dirty Short' nor 'Dirty Extended' download buttons")
+        # Attempt to find "Dirty Short Edit" and "Dirty Extended" download buttons
+        dirty_short = self.driver.execute_script(
+          """
+            for(var i = 0; i < arguments[0].length; ++i) {
+              if (arguments[0][i].innerText == 'Dirty Short Edit')
+                return arguments[0][i];
+            }
+            return null;
+          """
+        , song_versions)
 
-        if dirty_short_and_dirty_extended_is_present:
+        # If there is a dirty short version, construct a Song()
+        if dirty_short:
+          dirty_short = Song(self.driver, current_song, dirty_short)
+          print("Downloading: {} - {} (Dirty Short Edit)".format(dirty_short.artist, dirty_short.name))
+
+          if self.check_duplicate(dirty_short):
+            print("Duplicate: {} - {} (Dirty Short Edit)".format(dirty_short.artist, dirty_short.name))
+          else:
+            # Download the song 
+            #print("Downloaded {} - {}: {}".format(dirty_short.artist, dirty_short.name, dirty_short.download_song()))
+            pass
+                  
+        dirty_extended = self.driver.execute_script(
+          """
+            for(var i = 0; i < arguments[0].length; ++i) {
+              if (arguments[0][i].innerText == 'Dirty Extended')
+                return arguments[0][i];
+            }
+            return null;
+          """
+        , song_versions)
+
+        # If there is a dirty extended version, construct a Song()
+        if dirty_extended:
+          # Convert dirty extended to a Song() object
+          dirty_extended = Song(self.driver, current_song, dirty_extended)
+          print("Downloading: {} - {} (Dirty Extended Edit)".format(dirty_extended.artist, dirty_extended.name))
+          if self.check_duplicate(dirty_extended):
+            print("Duplicate: {} - {} (Dirty Extended Edit)".format(dirty_extended.artist, dirty_extended.name))
+          else:
+            # Download the song 
+            #print("Downloaded {} - {}: {}".format(dirty_extended.artist, dirty_extended.name, dirty_extended.download_song()))
+            pass
+
+        # If either versions have been downloaded
+        if dirty_short or dirty_extended:
+          # Set current_song to next song
+          try:
+            current_song = self.driver.execute_script(
+            """
+            return arguments[0].parentNode.parentNode.parentNode.nextSibling.getElementsByClassName('row-item')[0]
+            """, current_song)
+            continue
+          except JavascriptException:
+            print("Reached end of page: {}".format(page + 1))
+            break
+        
+        # Move to the next song 
+        try:
+          current_song = self.driver.execute_script(
+          """
+          return arguments[0].parentNode.parentNode.parentNode.nextSibling.getElementsByClassName('row-item')[0]
+          """, current_song)
+        except JavascriptException:
+          print("Reached end of page: {}".format(page + 1))
           break
 
-        try:
-          get_dirty = self.driver.execute_script(
-            """
-              for(var i = 0; i < arguments[0].length; ++i) {
-                if (arguments[0][i].innerText == 'Dirty') {
-                  arguments[0][i].click();
-                  return true;
-                }
-              }
-              return null;
-            """
-          )
-        except JavascriptException or TypeError:
-          print("Coud not find 'Dirty' download button")
-
-        if get_dirty:
-          break
-
-        try:
-          get_clean = self.driver.execute_script(
-            """
-              for(var i = 0; i < arguments[0].length; ++i) {
-                if (arguments[0][i].innerText == 'Clean') {
-                  arguments[0][i].click();
-                  return true;
-                }
-              }
-              return null;
-            """
-          )
-
-          except JavascriptException or TypeError:
-
+      # Find and click the next page button after all songs have been parsed on page
+      try:
+        WebDriverWait(self.driver, BpmSupreme.TIMEOUT).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "pagination")))
+        pagination = self.driver.find_element_by_class_name("pagination").find_elements_by_tag_name("li")
+        next_page = self.driver.execute_script(
+        """
+          for (var i = 0; i < arguments[0].length; ++i) {
+            if (arguments[0][i].innerText === '›') {
+              return arguments[0][i].firstChild
+            }
+          }
+          return null
+        """, pagination)
+        next_page.click()
+      except JavascriptException(stacktrace=True):
+        print("Unable to reach next page")
+        break
   
   def scroll_page(self, load_page_time=SCROLL_PAGE_WAIT_TIME):
     """
