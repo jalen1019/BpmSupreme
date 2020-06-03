@@ -327,8 +327,8 @@ class BpmSupreme:
             print("Duplicate: {} - {} (Dirty Short Edit)".format(dirty_short.artist, dirty_short.name))
           else:
             # Download the song 
-            #print("Downloaded {} - {}: {}".format(dirty_short.artist, dirty_short.name, dirty_short.download_song()))
-            pass
+            print("Downloaded {} - {}: {}".format(dirty_short.artist, dirty_short.name, dirty_short.download_song()))
+            
                   
         dirty_extended = self.driver.execute_script(
           """
@@ -349,8 +349,8 @@ class BpmSupreme:
             print("Duplicate: {} - {} (Dirty Extended Edit)".format(dirty_extended.artist, dirty_extended.name))
           else:
             # Download the song 
-            #print("Downloaded {} - {}: {}".format(dirty_extended.artist, dirty_extended.name, dirty_extended.download_song()))
-            pass
+            print("Downloaded {} - {}: {}".format(dirty_extended.artist, dirty_extended.name, dirty_extended.download_song()))
+            
 
         # If either versions have been downloaded
         if dirty_short or dirty_extended:
@@ -385,8 +385,8 @@ class BpmSupreme:
             print("Duplicate: {} - {} (Dirty)".format(dirty.artist, dirty.name))
           else:
             # Download the song 
-            #print("Downloaded {} - {}: {}".format(dirty.artist, dirty.name, dirty.download_song()))
-            pass
+            print("Downloaded {} - {}: {}".format(dirty.artist, dirty.name, dirty.download_song()))
+            
 
         # If there is a dirty version, skip to next song
         if dirty:
@@ -421,11 +421,69 @@ class BpmSupreme:
             print("Duplicate: {} - {} (Clean)".format(clean.artist, clean.name))
           else:
             # Download the song 
-            #print("Downloaded {} - {}: {}".format(clean.artist, clean.name, clean.download_song()))
-            pass
+            print("Downloaded {} - {}: {}".format(clean.artist, clean.name, clean.download_song()))
+            
 
         # If there is a clean version, skip to next song
         if clean:
+          # Set current_song to next song
+          try:
+            current_song = self.driver.execute_script(
+            """
+            return arguments[0].parentNode.parentNode.parentNode.nextSibling.getElementsByClassName('row-item')[0]
+            """, current_song)
+            continue
+          except JavascriptException:
+            print("Reached end of page: {}".format(page + 1))
+            break
+
+        # If there is no 'clean' version, get 'clean extended' and 'clean short' edit
+        clean_extended = self.driver.execute_script(
+          """
+            for(var i = 0; i < arguments[0].length; ++i) {
+              if (arguments[0][i].innerText == 'Clean Extended')
+                return arguments[0][i];
+            }
+            return null;
+          """
+        , song_versions)
+
+        # If there is a 'clean extended' version, construct a Song()
+        if clean_extended:
+          clean_extended = Song(self.driver, current_song, clean_extended)
+          print("Downloading: {} - {} (Clean Extended)".format(clean_extended.artist, clean_extended.name))
+
+          if self.check_duplicate(clean_extended):
+            print("Duplicate: {} - {} (Clean Extended)".format(clean_extended.artist, clean_extended.name))
+          else:
+            # Download the song 
+            print("Downloaded {} - {}: {}".format(clean_extended.artist, clean_extended.name, clean_extended.download_song()))
+            
+
+        clean_short = self.driver.execute_script(
+          """
+            for(var i = 0; i < arguments[0].length; ++i) {
+              if (arguments[0][i].innerText == 'Clean Short Edit')
+                return arguments[0][i];
+            }
+            return null;
+          """
+        , song_versions)
+
+        # If there is a 'Clean Short Edit' version, construct a Song()
+        if clean_short:
+          clean_short = Song(self.driver, current_song, clean_short)
+          print("Downloading: {} - {} (Clean Short Edit)".format(clean_short.artist, clean_short.name))
+
+          if self.check_duplicate(clean_short):
+            print("Duplicate: {} - {} (Clean Short Edit)".format(clean_short.artist, clean_short.name))
+          else:
+            # Download the song 
+            print("Downloaded {} - {}: {}".format(clean_short.artist, clean_short.name, clean_short.download_song()))
+            
+
+        # If there is a 'Clean Short Edit' version or 'Clean Extended', skip to next song
+        if clean_extended or clean_short:
           # Set current_song to next song
           try:
             current_song = self.driver.execute_script(
