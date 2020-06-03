@@ -321,10 +321,10 @@ class BpmSupreme:
         # If there is a dirty short version, construct a Song()
         if dirty_short:
           dirty_short = Song(self.driver, current_song, dirty_short)
-          print("Downloading: {} - {} (Dirty Short Edit)".format(dirty_short.artist, dirty_short.name))
+          dirty_short.name += " (Dirty Short Edit)"
 
           if self.check_duplicate(dirty_short):
-            print("Duplicate: {} - {} (Dirty Short Edit)".format(dirty_short.artist, dirty_short.name))
+            print("Duplicate: {} - {}".format(dirty_short.artist, dirty_short.name))
           else:
             # Download the song 
             print("Downloaded {} - {}: {}".format(dirty_short.artist, dirty_short.name, dirty_short.download_song()))
@@ -344,9 +344,9 @@ class BpmSupreme:
         if dirty_extended:
           # Convert dirty extended to a Song() object
           dirty_extended = Song(self.driver, current_song, dirty_extended)
-          print("Downloading: {} - {} (Dirty Extended Edit)".format(dirty_extended.artist, dirty_extended.name))
+          dirty_extended.name += " (Dirty Extended)"
           if self.check_duplicate(dirty_extended):
-            print("Duplicate: {} - {} (Dirty Extended Edit)".format(dirty_extended.artist, dirty_extended.name))
+            print("Duplicate: {} - {}".format(dirty_extended.artist, dirty_extended.name))
           else:
             # Download the song 
             print("Downloaded {} - {}: {}".format(dirty_extended.artist, dirty_extended.name, dirty_extended.download_song()))
@@ -379,10 +379,10 @@ class BpmSupreme:
         # If there is a 'dirty' version, construct a Song()
         if dirty:
           dirty = Song(self.driver, current_song, dirty)
-          print("Downloading: {} - {} (Dirty)".format(dirty.artist, dirty.name))
+          dirty.name += " (Dirty)"
 
           if self.check_duplicate(dirty):
-            print("Duplicate: {} - {} (Dirty)".format(dirty.artist, dirty.name))
+            print("Duplicate: {} - {}".format(dirty.artist, dirty.name))
           else:
             # Download the song 
             print("Downloaded {} - {}: {}".format(dirty.artist, dirty.name, dirty.download_song()))
@@ -415,10 +415,10 @@ class BpmSupreme:
         # If there is a 'clean' version, construct a Song()
         if clean:
           clean = Song(self.driver, current_song, clean)
-          print("Downloading: {} - {} (Clean)".format(clean.artist, clean.name))
+          clean.name += " (Clean)"
 
           if self.check_duplicate(clean):
-            print("Duplicate: {} - {} (Clean)".format(clean.artist, clean.name))
+            print("Duplicate: {} - {}".format(clean.artist, clean.name))
           else:
             # Download the song 
             print("Downloaded {} - {}: {}".format(clean.artist, clean.name, clean.download_song()))
@@ -451,10 +451,10 @@ class BpmSupreme:
         # If there is a 'clean extended' version, construct a Song()
         if clean_extended:
           clean_extended = Song(self.driver, current_song, clean_extended)
-          print("Downloading: {} - {} (Clean Extended)".format(clean_extended.artist, clean_extended.name))
+          clean_extended.name += " (Clean Extended)"
 
           if self.check_duplicate(clean_extended):
-            print("Duplicate: {} - {} (Clean Extended)".format(clean_extended.artist, clean_extended.name))
+            print("Duplicate: {} - {}".format(clean_extended.artist, clean_extended.name))
           else:
             # Download the song 
             print("Downloaded {} - {}: {}".format(clean_extended.artist, clean_extended.name, clean_extended.download_song()))
@@ -473,10 +473,10 @@ class BpmSupreme:
         # If there is a 'Clean Short Edit' version, construct a Song()
         if clean_short:
           clean_short = Song(self.driver, current_song, clean_short)
-          print("Downloading: {} - {} (Clean Short Edit)".format(clean_short.artist, clean_short.name))
+          clean_short.name += " (Clean Short Edit)"
 
           if self.check_duplicate(clean_short):
-            print("Duplicate: {} - {} (Clean Short Edit)".format(clean_short.artist, clean_short.name))
+            print("Duplicate: {} - {}".format(clean_short.artist, clean_short.name))
           else:
             # Download the song 
             print("Downloaded {} - {}: {}".format(clean_short.artist, clean_short.name, clean_short.download_song()))
@@ -576,7 +576,7 @@ class BpmSupreme:
     library = set()
     with os.scandir(self.path) as entries:
       for entry in entries:
-        file_song_title = entry.name.split(sep=".mp3")[0].split(sep="-")[-1].strip()
+        file_song_title = entry.name.split(sep=".mp3")[0].split(sep=" - ")[-1].strip()
         library.add(file_song_title)
 
     return library
