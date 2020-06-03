@@ -26,6 +26,13 @@ if __name__ == "__main__":
 
   while not os.path.isdir(DOWNLOAD_PATH):
     DOWNLOAD_PATH = input("Download file path: ")
+  
+  with os.scandir(DOWNLOAD_PATH) as entries:
+    for entry in entries:
+      print("Detected file: {}".format(entry.name))
+  if input("Is this correct? (y/n): ") != "y":
+    print("Exiting...")
+    exit
 
   # Set Firefox profile 
   options = Options()
@@ -45,12 +52,6 @@ if __name__ == "__main__":
     # Log into account
     account = BpmSupreme(driver, USERNAME, PASSWORD, DOWNLOAD_PATH)
     assert account.login()
-
-    with os.scandir(DOWNLOAD_PATH) as entries:
-      for entry in entries:
-        print("Detected file: {}".format(entry.name))
-    if input("Is this correct? (y/n): ") != "y":
-      print("Exiting...")
-
+        
     page_count = input("How many pages of the new releases to download: ")
-    account.download_new_releases(int(page_count))
+    account.download_exclusives(int(page_count))
