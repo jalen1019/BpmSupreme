@@ -364,6 +364,78 @@ class BpmSupreme:
           except JavascriptException:
             print("Reached end of page: {}".format(page + 1))
             break
+
+        # Could not find 'dirty short' or 'dirty extended' so look for 'dirty'
+        dirty = self.driver.execute_script(
+          """
+            for(var i = 0; i < arguments[0].length; ++i) {
+              if (arguments[0][i].innerText == 'Dirty')
+                return arguments[0][i];
+            }
+            return null;
+          """
+        , song_versions)
+
+        # If there is a 'dirty' version, construct a Song()
+        if dirty:
+          dirty = Song(self.driver, current_song, dirty)
+          print("Downloading: {} - {} (Dirty)".format(dirty.artist, dirty.name))
+
+          if self.check_duplicate(dirty):
+            print("Duplicate: {} - {} (Dirty)".format(dirty.artist, dirty.name))
+          else:
+            # Download the song 
+            #print("Downloaded {} - {}: {}".format(dirty.artist, dirty.name, dirty.download_song()))
+            pass
+
+        # If there is a dirty version, skip to next song
+        if dirty:
+          # Set current_song to next song
+          try:
+            current_song = self.driver.execute_script(
+            """
+            return arguments[0].parentNode.parentNode.parentNode.nextSibling.getElementsByClassName('row-item')[0]
+            """, current_song)
+            continue
+          except JavascriptException:
+            print("Reached end of page: {}".format(page + 1))
+            break
+
+        # No 'dirty' version, so get 'clean' version
+        clean = self.driver.execute_script(
+          """
+            for(var i = 0; i < arguments[0].length; ++i) {
+              if (arguments[0][i].innerText == 'Clean')
+                return arguments[0][i];
+            }
+            return null;
+          """
+        , song_versions)
+
+        # If there is a 'clean' version, construct a Song()
+        if clean:
+          clean = Song(self.driver, current_song, clean)
+          print("Downloading: {} - {} (Clean)".format(clean.artist, clean.name))
+
+          if self.check_duplicate(clean):
+            print("Duplicate: {} - {} (Clean)".format(clean.artist, clean.name))
+          else:
+            # Download the song 
+            #print("Downloaded {} - {}: {}".format(clean.artist, clean.name, clean.download_song()))
+            pass
+
+        # If there is a clean version, skip to next song
+        if clean:
+          # Set current_song to next song
+          try:
+            current_song = self.driver.execute_script(
+            """
+            return arguments[0].parentNode.parentNode.parentNode.nextSibling.getElementsByClassName('row-item')[0]
+            """, current_song)
+            continue
+          except JavascriptException:
+            print("Reached end of page: {}".format(page + 1))
+            break
         
         # Move to the next song 
         try:
