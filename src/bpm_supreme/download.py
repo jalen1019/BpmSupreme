@@ -61,7 +61,7 @@ if __name__ == "__main__":
   with Firefox(firefox_profile) as driver:        
     # MAIN FUNCTION HERE
     # Log into account
-    account = BpmSupreme(driver, USERNAME, PASSWORD, DUPLICATE_PATH)
+    account = BpmSupreme(driver, USERNAME, PASSWORD, DUPLICATE_PATH, DOWNLOAD_PATH)
     assert account.login()
         
     page_count = input("How many pages of the new releases to download: ")

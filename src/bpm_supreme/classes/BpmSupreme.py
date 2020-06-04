@@ -29,7 +29,7 @@ class BpmSupreme:
   TIMEOUT = 120
   SCROLL_PAGE_WAIT_TIME = 5
   
-  def __init__(self, driver, username, password, path):
+  def __init__(self, driver, username, password, download_path, duplicate_path):
     """
     Constructor for BpmSupreme object
 
@@ -48,19 +48,24 @@ class BpmSupreme:
     # Check password
     if isinstance(password, str) != True: raise TypeError("Wrong type: {} for password whereas a str is expected".format(type(password)))
 
-    # Check path is string
-    if isinstance(path, str) != True:
-      raise TypeError("Wrong type: Expected str for path; Got {}".format(type(path)))
+    # Check paths
+    if not isinstance(download_path, str):
+      raise TypeError("Wrong type: Expected str for download_path; Got {}".format(type(download_path)))
+      
+    if not isinstance(duplicate_path, str):
+      raise TypeError("Wrong type: Expected str for duplicate_path; Got {}".format(type(duplicate_path)))
 
     # Check path is valid
-    if os.path.isdir(path) != True:
-      raise ValueError("Bad path: Expected valid path for path")
+    if not os.path.isdir(download_path) or not os.path.isdir(duplicate_path):
+      raise ValueError("Bad path: Expected valid path")
     
     self.driver = driver
     self._username = username
     self._password = password
-    self.path = path
+    self.path = download_path
     self.local_library = self.update_library()
+    self.path = duplicate_path
+    self.local_library.update(self.update_library())
 
   def login(self):
     """
