@@ -527,6 +527,16 @@ class BpmSupreme:
       except JavascriptException(stacktrace=True):
         print("Unable to reach next page")
         break
+
+  def genre_downloads(self):
+    """
+      Order of Priority
+      1. Intro Dirty and Quick Hit Dirty
+      2. Intro Clean and Intro Dirty
+      3. Dirty and Clean
+      4. Clean Short Edit
+    """
+    pass
   
   def scroll_page(self, load_page_time=SCROLL_PAGE_WAIT_TIME):
     """
