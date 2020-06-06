@@ -528,8 +528,17 @@ class BpmSupreme:
         print("Unable to reach next page")
         break
 
-  def genre_downloads(self):
+  def genre_download(self, page_url, page_count):
     """
+      Downloads songs according to order of priority
+    
+      Args:
+        - page_url: Url of genre page
+        - page_count: Number of pages to download
+
+      Returns:
+        - none
+    
       Order of Priority
       1. Intro Dirty and Quick Hit Dirty
       2. Intro Clean and Quick Hit Clean
