@@ -545,7 +545,25 @@ class BpmSupreme:
       3. Dirty and Clean
       4. Clean Short Edit
     """
-    pass
+    # Type checking
+    if not isinstance(page_url, str):
+      raise TypeError("Error: Expected str() for page_url; got {}".format(type(page_url)))
+
+    if not isinstance(page_count, int):
+      raise (TypeError("Error: Expected int() for page_count; got {}".format(type(page_count))))
+    
+    # Check page_count amount
+    if not page_count:
+      raise ValueError("Error: Expected page_count greater than 0. Got {}".format(page_count))
+    
+    # Navigate to page_url
+    self.driver.get(page_url)
+    
+    # Attempt to find a table-media container for songs
+    url_isValid = self.driver.find_elements_by_class_name("table-media")
+    # Check if page is valid
+    if not url_isValid:
+      raise ValueError("Invalid URL: {}".format(page_url))
   
   def scroll_page(self, load_page_time=SCROLL_PAGE_WAIT_TIME):
     """
