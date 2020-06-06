@@ -573,9 +573,13 @@ class BpmSupreme:
         - current_song: The current song
       
       Returns:
-        - WebElement corresponding to the next row-container on the page. If no next song, returns false
+        - WebElement corresponding to the next row-item on the page. If no next song, returns false
     """
-    pass
+    return self.driver.execute_script(
+      """
+        return arguments[0].parentNode.parentNode.parentNode.nextSibling.getElementsByClassName('row-item')
+      """, current_song
+    )
   
   def scroll_page(self, load_page_time=SCROLL_PAGE_WAIT_TIME):
     """
