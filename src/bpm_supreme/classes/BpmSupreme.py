@@ -568,6 +568,20 @@ class BpmSupreme:
     if not url_isValid:
       raise ValueError("Invalid URL: {}".format(page_url))
 
+    for page in page_count:
+      # Initialize current_song to first row-item container on the page
+      current_song = self.driver.execute_script(
+        """
+          return document.getElementsByClassName('table-media')[0].firstChild.firstChild.firstChild.getElementsByClassName('row-item')[0]
+        """
+      ) 
+
+      # While the current song is valid
+      while current_song:
+        # Find all song versions 
+        song_versions = self.get_song_versions(current_song)
+        
+
   def get_next_song(self, current_song):
     """
       Returns the next row-container based on the current row-container
@@ -583,6 +597,13 @@ class BpmSupreme:
         return arguments[0].parentNode.parentNode.parentNode.nextSibling.getElementsByClassName('row-item')
       """, current_song
     )
+
+  def get_song_versions(self, current_song):
+    return self.driver.execute_script(
+          """
+            return arguments[0].getElementsByClassName('tag-link')
+          """, current_song
+        )
   
   def scroll_page(self, load_page_time=SCROLL_PAGE_WAIT_TIME):
     """
