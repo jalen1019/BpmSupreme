@@ -564,6 +564,18 @@ class BpmSupreme:
     # Check if page is valid
     if not url_isValid:
       raise ValueError("Invalid URL: {}".format(page_url))
+
+  def get_next_song(self, current_song):
+    """
+      Returns the next row-container based on the current row-container
+
+      Args:
+        - current_song: The current song
+      
+      Returns:
+        - WebElement corresponding to the next row-container on the page. If no next song, returns false
+    """
+    pass
   
   def scroll_page(self, load_page_time=SCROLL_PAGE_WAIT_TIME):
     """
