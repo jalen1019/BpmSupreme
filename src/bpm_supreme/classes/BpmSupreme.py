@@ -558,6 +558,9 @@ class BpmSupreme:
     
     # Navigate to page_url
     self.driver.get(page_url)
+
+    # Wait until a .row container is ready to be clickable
+    WebDriverWait(self.driver, BpmSupreme.TIMEOUT).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "row-container")))
     
     # Attempt to find a table-media container for songs
     url_isValid = self.driver.find_elements_by_class_name("table-media")
