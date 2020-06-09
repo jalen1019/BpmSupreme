@@ -623,6 +623,15 @@ class BpmSupreme:
             #intro_dirty.download_song()
             continue
 
+        # If we have both "Intro Dirty" and "Quick Hit Dirty" song versions downloaded
+        if intro_dirty and quick_hit_dirty:
+          try:
+            current_song = self.get_next_song(current_song)        
+            continue
+          except JavascriptException:
+            print("Reached end of page: {}".format(page + 1))
+            break
+        
         
 
   def get_next_song(self, current_song):
