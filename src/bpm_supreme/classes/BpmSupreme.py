@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import JavascriptException
+from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -784,6 +785,11 @@ class BpmSupreme:
     except JavascriptException(stacktrace=True):
       print("Unable to reach next page")
       return False
+
+    # Just in case a popup appears that was not closed
+    except ElementClickInterceptedException:
+      close_button = WebDriverWait(self.driver, 0.25).until(expected_conditions.element_to_be_clickable((By.CSS_SELECTOR, "div.close")))
+      close_button.click()
     return True
 
   def get_next_song(self, current_song):
@@ -987,11 +993,11 @@ class Song():
     # Try to detect popup
     try:      
       # Look for popup on screen
-      popup = WebDriverWait(self.driver, 2.5).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "popup_inner")))
+      popup = WebDriverWait(self.driver, Song.SLEEP_INTERVAL).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "popup_inner")))
       
       # Find useful popup elements
-      popup_text_title = WebDriverWait(self.driver, 2.5).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "title")))
-      close_button = WebDriverWait(self.driver, 2.5).until(expected_conditions.element_to_be_clickable((By.CSS_SELECTOR, "div.close")))
+      popup_text_title = WebDriverWait(self.driver, 0.25).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "title")))
+      close_button = WebDriverWait(self.driver, 0.25).until(expected_conditions.element_to_be_clickable((By.CSS_SELECTOR, "div.close")))
 
       # Double check we're looking at the correct popup
       if popup_text_title.text == "Download Limit":
