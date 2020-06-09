@@ -632,7 +632,32 @@ class BpmSupreme:
             print("Reached end of page: {}".format(page + 1))
             break
         
+        # Move to the next page after all songs on page have been parsed
+        self.get_next_page()
         
+  def get_next_page(self):
+    """
+      Attempts to find the pagination button for next page.
+      Returns True if able to click next page, else returns False
+    """
+    # Find and click the next page button after all songs have been parsed on page
+    try:
+      WebDriverWait(self.driver, BpmSupreme.TIMEOUT).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "pagination")))
+      pagination = self.driver.find_element_by_class_name("pagination").find_elements_by_tag_name("li")
+      next_page = self.driver.execute_script(
+      """
+        for (var i = 0; i < arguments[0].length; ++i) {
+          if (arguments[0][i].innerText === '›') {
+            return arguments[0][i].firstChild
+          }
+        }
+        return null
+      """, pagination)
+      next_page.click()
+    except JavascriptException(stacktrace=True):
+      print("Unable to reach next page")
+      return False
+    return True
 
   def get_next_song(self, current_song):
     """
