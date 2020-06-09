@@ -599,6 +599,16 @@ class BpmSupreme:
     )
 
   def get_song_versions(self, current_song):
+    """
+      Gets the current song versions within the current row-item
+
+      Args:
+        - current_song: WebElement with class: 'row-item'
+
+      Returns:
+        - Returns a WebElement List of tag-link elements 
+    """
+
     if not isinstance(current_song, expected_conditions.WebElement):
       raise ValueError("Error: Expected WebElement for current_song; got {}".format(type(current_song)))
     
