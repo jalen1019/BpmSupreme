@@ -568,13 +568,13 @@ class BpmSupreme:
     if not url_isValid:
       raise ValueError("Invalid URL: {}".format(page_url))
 
-    for page in page_count:
+    for page in range(page_count):
       # Initialize current_song to first row-item container on the page
       current_song = self.driver.execute_script(
         """
           return document.getElementsByClassName('table-media')[0].firstChild.firstChild.firstChild.getElementsByClassName('row-item')[0]
         """
-      ) 
+      )
 
       # While the current song is valid
       while current_song:
