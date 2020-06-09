@@ -671,7 +671,7 @@ class BpmSupreme:
     """
     return self.driver.execute_script(
       """
-        return arguments[0].parentNode.parentNode.parentNode.nextSibling.getElementsByClassName('row-item')
+        return arguments[0].parentNode.parentNode.parentNode.nextSibling.getElementsByClassName('row-item')[0]
       """, current_song
     )
 
