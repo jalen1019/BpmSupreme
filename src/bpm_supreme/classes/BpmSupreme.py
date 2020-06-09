@@ -631,6 +631,54 @@ class BpmSupreme:
           except JavascriptException:
             print("Reached end of page: {}".format(page + 1))
             break
+
+        """
+          At this point in the loop, the first song versions to look 
+          for in the order of priority have not been found, so we will
+          move on to looking for the next versions of the song to 
+          parse based on the order of priority: "Intro Clean" and 
+          "Intro Dirty"
+        """
+
+        for version in song_versions:
+          if version.text == "Intro Clean":
+            # Initialize intro_clean to a Song object and append the version to the name
+            intro_clean = Song(self.driver, current_song, version)
+            intro_clean.name += " (Intro Clean)"
+
+            # If the song is a duplicate, skip over it
+            if self.check_duplicate(intro_clean):
+              print("Duplicate {} - {}".format(intro_clean.artist, intro_clean.name))
+              continue
+
+            # If the song is not a duplicate, download it 
+            print("Downloading: {} - {}".format(intro_clean.artist, intro_clean.name))
+            #intro_clean.download_song()
+            continue
+
+          if version.text == "Quick Hit Clean":
+            # Initialize quick_hit_clean to a Song object and append the version to the name
+            quick_hit_clean = Song(self.driver, current_song, version)
+            quick_hit_clean.name += " (Quick Hit Clean)"
+
+            # If the song is a duplicate, skip over it
+            if self.check_duplicate(quick_hit_clean):
+              print("Duplicate {} - {}".format(quick_hit_clean.artist, quick_hit_clean.name))
+              continue
+
+            # If the song is not a duplicate, download it 
+            print("Downloading: {} - {}".format(quick_hit_clean.artist, quick_hit_clean.name))
+            #quick_hit_clean.download_song()
+            continue
+
+        # If we have both "Intro Clean" or "Quick Hit Clean" song versions downloaded, get the next song
+        if intro_clean or quick_hit_clean:
+          try:
+            current_song = self.get_next_song(current_song)        
+            continue
+          except JavascriptException:
+            print("Reached end of page: {}".format(page + 1))
+            break
         
         # Move to the next page after all songs on page have been parsed
         self.get_next_page()
