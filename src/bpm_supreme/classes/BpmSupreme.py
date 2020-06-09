@@ -528,7 +528,7 @@ class BpmSupreme:
         print("Unable to reach next page")
         break
 
-  def genre_download(self, page_url, page_count):
+  def download_genre(self, page_url, page_count):
     """
       Downloads songs according to order of priority
     
