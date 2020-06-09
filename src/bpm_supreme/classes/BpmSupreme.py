@@ -569,6 +569,8 @@ class BpmSupreme:
       raise ValueError("Invalid URL: {}".format(page_url))
 
     for page in range(page_count):
+      # Wait until a .row container is ready to be clickable
+      WebDriverWait(self.driver, BpmSupreme.TIMEOUT).until(expected_conditions.element_to_be_clickable((By.CLASS_NAME, "row-container")))
       # Initialize current_song to first row-item container on the page
       current_song = self.driver.execute_script(
         """
@@ -584,6 +586,11 @@ class BpmSupreme:
         # Initialize songs to detect
         intro_dirty = None
         quick_hit_dirty = None
+        intro_clean = None
+        quick_hit_clean = None
+        dirty = None
+        clean = None
+        clean_short = None
 
         assert song_versions, "Unable to detect any song versions"
         
@@ -605,7 +612,7 @@ class BpmSupreme:
 
             # If the song is not a duplicate, download it
             print("Downloading {} - {}".format(intro_dirty.artist, intro_dirty.name))
-            #intro_dirty.download_song()
+            intro_dirty.download_song()
             continue
 
           if version.text == "Quick Hit Dirty":
@@ -620,7 +627,7 @@ class BpmSupreme:
 
             # If the song is not a duplicate, download it 
             print("Downloading: {} - {}".format(quick_hit_dirty.artist, quick_hit_dirty.name))
-            #intro_dirty.download_song()
+            quick_hit_dirty.download_song()
             continue
 
         # If we have both "Intro Dirty" and "Quick Hit Dirty" song versions downloaded
@@ -653,7 +660,7 @@ class BpmSupreme:
 
             # If the song is not a duplicate, download it 
             print("Downloading: {} - {}".format(intro_clean.artist, intro_clean.name))
-            #intro_clean.download_song()
+            intro_clean.download_song()
             continue
 
           if version.text == "Quick Hit Clean":
@@ -668,7 +675,7 @@ class BpmSupreme:
 
             # If the song is not a duplicate, download it 
             print("Downloading: {} - {}".format(quick_hit_clean.artist, quick_hit_clean.name))
-            #quick_hit_clean.download_song()
+            quick_hit_clean.download_song()
             continue
 
         # If we have both "Intro Clean" or "Quick Hit Clean" song versions downloaded, get the next song
@@ -679,9 +686,81 @@ class BpmSupreme:
           except JavascriptException:
             print("Reached end of page: {}".format(page + 1))
             break
+
+        """
+          At this point in the loop we will look for the Dirty and  
+          Clean versions of the song
+        """
+        for version in song_versions:
+          if version.text == "Dirty":
+            # Initialize dirty to a Song object and append the version to the name
+            dirty = Song(self.driver, current_song, version)
+            dirty.name += " (Dirty)"
+
+            # If the song is a duplicate, skip over it
+            if self.check_duplicate(dirty):
+              print("Duplicate {} - {}".format(dirty.artist, dirty.name))
+              continue
+
+            # If the song is not a duplicate, download it 
+            print("Downloading: {} - {}".format(dirty.artist, dirty.name))
+            dirty.download_song()
+            continue
+
+          if version.text == "Clean":
+            # Initialize clean to a Song object and append the version to the name
+            clean = Song(self.driver, current_song, version)
+            clean.name += " (Clean)"
+
+            # If the song is a duplicate, skip over it
+            if self.check_duplicate(clean):
+              print("Duplicate {} - {}".format(clean.artist, clean.name))
+              continue
+
+            # If the song is not a duplicate, download it 
+            print("Downloading: {} - {}".format(clean.artist, clean.name))
+            clean.download_song()
+            continue
+
+        # If we have both "Dirty" or "Clean" song versions downloaded, get the next song
+        if dirty or clean:
+          try:
+            current_song = self.get_next_song(current_song)        
+            continue
+          except JavascriptException:
+            print("Reached end of page: {}".format(page + 1))
+            break
+
+        """
+          At this point in the program we will look for the "Clean 
+          Short Edit" version of the current song.
+        """
+
+        for version in song_versions:
+          if version.text == "Clean Short Edit":
+            # Initialize clean_short to a Song object and append the version to the name
+            clean_short = Song(self.driver, current_song, version)
+            clean_short.name += " (Clean Short Edit)"
+
+            # If the song is a duplicate, skip over it
+            if self.check_duplicate(clean_short):
+              print("Duplicate {} - {}".format(clean_short.artist, clean_short.name))
+              continue
+
+            # If the song is not a duplicate, download it 
+            print("Downloading: {} - {}".format(clean_short.artist, clean_short.name))
+            clean_short.download_song()
+            continue
+
+        try:
+            current_song = self.get_next_song(current_song)        
+            continue
+        except JavascriptException:
+          print("Reached end of page: {}".format(page + 1))
+          break
         
         # Move to the next page after all songs on page have been parsed
-        self.get_next_page()
+      self.get_next_page()
         
   def get_next_page(self):
     """
