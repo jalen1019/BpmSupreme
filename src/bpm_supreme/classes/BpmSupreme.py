@@ -599,6 +599,9 @@ class BpmSupreme:
     )
 
   def get_song_versions(self, current_song):
+    if not isinstance(current_song, expected_conditions.WebElement):
+      raise ValueError("Error: Expected WebElement for current_song; got {}".format(type(current_song)))
+    
     return self.driver.execute_script(
           """
             return arguments[0].getElementsByClassName('tag-link')
