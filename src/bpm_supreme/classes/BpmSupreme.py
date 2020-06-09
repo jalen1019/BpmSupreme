@@ -579,7 +579,50 @@ class BpmSupreme:
       # While the current song is valid
       while current_song:
         # Find all song versions 
-        song_versions = self.get_song_versions(current_song)
+        song_versions = set(self.get_song_versions(current_song))
+
+        # Initialize songs to detect
+        intro_dirty = None
+        quick_hit_dirty = None
+
+        assert song_versions, "Unable to detect any song versions"
+        
+        """
+        Attempt to find Intro Dirty and Quick Hit Dirty buttons.
+        If the intro_dirty or quick_hit_dirty are not set to None
+        after this loop, then the current song has those song 
+        versions.
+        """
+        for version in song_versions:
+          if version.text == "Intro Dirty":
+            intro_dirty = Song(self.driver, current_song, version)
+            intro_dirty.name += " (Intro Dirty)"
+
+            # Check if intro_dirty is a duplicate song
+            if self.check_duplicate(intro_dirty):
+              print("Duplicate: {} - {}".format(intro_dirty.artist, intro_dirty.name))
+              continue
+
+            # If the song is not a duplicate, download it
+            print("Downloading {} - {}".format(intro_dirty.artist, intro_dirty.name))
+            #intro_dirty.download_song()
+            continue
+
+          if version.text == "Quick Hit Dirty":
+            # Initialize quick_hit_dirty to a Song object and append the version to the name
+            quick_hit_dirty = Song(self.driver, current_song, version)
+            quick_hit_dirty.name += " (Quick Hit Dirty)"
+
+            # If the song is a duplicate, skip over it
+            if self.check_duplicate(quick_hit_dirty):
+              print("Duplicate {} - {}".format(quick_hit_dirty.artist, quick_hit_dirty.name))
+              continue
+
+            # If the song is not a duplicate, download it 
+            print("Downloading: {} - {}".format(quick_hit_dirty.artist, quick_hit_dirty.name))
+            #intro_dirty.download_song()
+            continue
+
         
 
   def get_next_song(self, current_song):
