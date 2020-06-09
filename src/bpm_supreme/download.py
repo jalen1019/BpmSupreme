@@ -64,5 +64,5 @@ if __name__ == "__main__":
     account = BpmSupreme(driver, USERNAME, PASSWORD, DUPLICATE_PATH, DOWNLOAD_PATH)
     assert account.login()
         
-    page_count = input("How many pages of the new releases to download: ")
-    account.download_exclusives(int(page_count))
+    page_count = input("How many pages of the genre to download: ")
+    account.download_genre("https://app.bpmsupreme.com/new-releases/audio/80s-%26-back", int(page_count))
