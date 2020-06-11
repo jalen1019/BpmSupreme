@@ -582,6 +582,9 @@ class BpmSupreme:
 
       # While the current song is valid
       while current_song:
+        # Add a timer to prevent reaching download rate limit
+        time.sleep(BpmSupreme.DOWNLOAD_RATE_LIMIT_TIMEOUT)
+        
         # Find all song versions 
         song_versions = set(self.get_song_versions(current_song))
 
