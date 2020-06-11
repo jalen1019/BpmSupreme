@@ -29,6 +29,7 @@ class BpmSupreme:
   # Amount of time to wait for a WebElement to load
   TIMEOUT = 120
   SCROLL_PAGE_WAIT_TIME = 5
+  DOWNLOAD_RATE_LIMIT_TIMEOUT = 2
   
   def __init__(self, driver, username, password, download_path, duplicate_path):
     """
