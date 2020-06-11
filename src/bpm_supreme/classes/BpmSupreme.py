@@ -283,10 +283,10 @@ class BpmSupreme:
       - none
   
     Order of song priority:
-    Dirty short and dirty extended
-    If none, get dirty
-    If no dirty, get clean
-    If no clean, get clean extended and clean short edit
+      Dirty short and dirty extended
+      If none, get dirty
+      If no dirty, get clean
+      If no clean, get clean extended and clean short edit
     """
     # Get the exclusives page
     self.driver.get("https://app.bpmsupreme.com/new-releases/audio/exclusives")
