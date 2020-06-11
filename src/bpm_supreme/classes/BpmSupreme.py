@@ -542,10 +542,10 @@ class BpmSupreme:
         - none
     
       Order of Priority
-      1. Intro Dirty and Quick Hit Dirty
-      2. Intro Clean and Quick Hit Clean
-      3. Dirty and Clean
-      4. Clean Short Edit
+        1. Intro Dirty and Quick Hit Dirty
+        2. Intro Clean and Quick Hit Clean
+        3. Dirty and Clean
+        4. Clean Short Edit
     """
     # Type checking
     if not isinstance(page_url, str):
@@ -582,9 +582,6 @@ class BpmSupreme:
 
       # While the current song is valid
       while current_song:
-        # Add a timer to prevent reaching download rate limit
-        time.sleep(BpmSupreme.DOWNLOAD_RATE_LIMIT_TIMEOUT)
-        
         # Find all song versions 
         song_versions = set(self.get_song_versions(current_song))
 
@@ -617,6 +614,10 @@ class BpmSupreme:
 
             # If the song is not a duplicate, download it
             print("Downloading {} - {}".format(intro_dirty.artist, intro_dirty.name))
+
+            # Add a timer to prevent reaching download rate limit
+            time.sleep(BpmSupreme.DOWNLOAD_RATE_LIMIT_TIMEOUT)
+            
             intro_dirty.download_song()
             continue
 
@@ -627,11 +628,15 @@ class BpmSupreme:
 
             # If the song is a duplicate, skip over it
             if self.check_duplicate(quick_hit_dirty):
-              print("Duplicate {} - {}".format(quick_hit_dirty.artist, quick_hit_dirty.name))
+              print("Duplicate: {} - {}".format(quick_hit_dirty.artist, quick_hit_dirty.name))
               continue
 
             # If the song is not a duplicate, download it 
             print("Downloading: {} - {}".format(quick_hit_dirty.artist, quick_hit_dirty.name))
+
+            # Add a timer to prevent reaching download rate limit
+            time.sleep(BpmSupreme.DOWNLOAD_RATE_LIMIT_TIMEOUT)
+            
             quick_hit_dirty.download_song()
             continue
 
@@ -660,11 +665,15 @@ class BpmSupreme:
 
             # If the song is a duplicate, skip over it
             if self.check_duplicate(intro_clean):
-              print("Duplicate {} - {}".format(intro_clean.artist, intro_clean.name))
+              print("Duplicate: {} - {}".format(intro_clean.artist, intro_clean.name))
               continue
 
             # If the song is not a duplicate, download it 
             print("Downloading: {} - {}".format(intro_clean.artist, intro_clean.name))
+
+            # Add a timer to prevent reaching download rate limit
+            time.sleep(BpmSupreme.DOWNLOAD_RATE_LIMIT_TIMEOUT)
+            
             intro_clean.download_song()
             continue
 
@@ -675,11 +684,15 @@ class BpmSupreme:
 
             # If the song is a duplicate, skip over it
             if self.check_duplicate(quick_hit_clean):
-              print("Duplicate {} - {}".format(quick_hit_clean.artist, quick_hit_clean.name))
+              print("Duplicate: {} - {}".format(quick_hit_clean.artist, quick_hit_clean.name))
               continue
 
             # If the song is not a duplicate, download it 
             print("Downloading: {} - {}".format(quick_hit_clean.artist, quick_hit_clean.name))
+
+            # Add a timer to prevent reaching download rate limit
+            time.sleep(BpmSupreme.DOWNLOAD_RATE_LIMIT_TIMEOUT)
+            
             quick_hit_clean.download_song()
             continue
 
@@ -704,11 +717,15 @@ class BpmSupreme:
 
             # If the song is a duplicate, skip over it
             if self.check_duplicate(dirty):
-              print("Duplicate {} - {}".format(dirty.artist, dirty.name))
+              print("Duplicate: {} - {}".format(dirty.artist, dirty.name))
               continue
 
             # If the song is not a duplicate, download it 
             print("Downloading: {} - {}".format(dirty.artist, dirty.name))
+
+            # Add a timer to prevent reaching download rate limit
+            time.sleep(BpmSupreme.DOWNLOAD_RATE_LIMIT_TIMEOUT)
+            
             dirty.download_song()
             continue
 
@@ -719,11 +736,15 @@ class BpmSupreme:
 
             # If the song is a duplicate, skip over it
             if self.check_duplicate(clean):
-              print("Duplicate {} - {}".format(clean.artist, clean.name))
+              print("Duplicate: {} - {}".format(clean.artist, clean.name))
               continue
 
             # If the song is not a duplicate, download it 
             print("Downloading: {} - {}".format(clean.artist, clean.name))
+
+            # Add a timer to prevent reaching download rate limit
+            time.sleep(BpmSupreme.DOWNLOAD_RATE_LIMIT_TIMEOUT)
+            
             clean.download_song()
             continue
 
@@ -749,11 +770,16 @@ class BpmSupreme:
 
             # If the song is a duplicate, skip over it
             if self.check_duplicate(clean_short):
-              print("Duplicate {} - {}".format(clean_short.artist, clean_short.name))
+              print("Duplicate: {} - {}".format(clean_short.artist, clean_short.name))
               continue
 
             # If the song is not a duplicate, download it 
-            print("Downloading: {} - {}".format(clean_short.artist, clean_short.name))
+            print("Downloading: {} - {}".format(clean_short.artist, clean_short.
+            name))
+
+            # Add a timer to prevent reaching download rate limit
+            time.sleep(BpmSupreme.DOWNLOAD_RATE_LIMIT_TIMEOUT)
+            
             clean_short.download_song()
             continue
 
