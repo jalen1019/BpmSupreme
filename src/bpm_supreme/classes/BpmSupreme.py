@@ -532,7 +532,7 @@ class BpmSupreme:
     """
       Order of Priority
       1. Intro Dirty and Quick Hit Dirty
-      2. Intro Clean and Intro Dirty
+      2. Intro Clean and Quick Hit Clean
       3. Dirty and Clean
       4. Clean Short Edit
     """
